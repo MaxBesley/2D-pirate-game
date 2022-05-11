@@ -16,7 +16,7 @@ public class Sailor extends Person {
     // The sailor's internal instance variables
     private final Image SAILOR_LEFT;
     private final Image SAILOR_RIGHT;
-    private static final int SPEED = 5;
+    private static final int SPEED = 1;
 
 
     // Constructor
@@ -33,14 +33,14 @@ public class Sailor extends Person {
     }
 
     @Override
-    public void update(Input input, ArrayList<Block> allBlocks) {
+    public void update(Input input, Level level) {
         draw();
         drawHealthBar();
 
         move(input);
-        if (hasCollided(allBlocks)) {
-            moveBack();
-        }
+
+        checkOutOfBounds(level);
+        checkBlockCollisions(level);
     }
 
     // For getting the x and y coordinates of the sailor object
@@ -79,52 +79,68 @@ public class Sailor extends Person {
 
     }
 
+    /*
+     * Method that sets `oldPosition` to be identical to `position`
+     */
     private void setOldPosition() {
-        // `oldPosition` is a copy of the current position
-        // Use the copy constructor in the `Position` class
+        // The old position should be a copy of the current position
+        // So use the copy constructor in the `Position` class
         oldPosition = new Position(position);
     }
 
     /**
-     * Moves the sailor back to its previous position
+     * Moves the Sailor object back to its previous position
      */
     private void moveBack(){
         position = oldPosition;
     }
 
     /*
-     * Draws the health percentage the sailor currently has to the screen
+     * Draws the health percentage the Sailor object currently has to the screen
      */
     private void drawHealthBar() {
         healthBar.drawToScreen();
     }
 
     /*
-     * Method that gets the hitbox of the sailor
+     * Method that gets the hitbox of the Sailor object
      */
     public Rectangle getHitbox() {
         return currentImage.getBoundingBoxAt(new Point(getX(), getY()));
     }
 
     /*
-     * Method that determines if the sailor has collided with the passed Block object
+     * Method that determines if a Sailor object has collided with the passed Block object
      */
-    public boolean doesCollide(Block block) {
+    private boolean hasCollided(Block block) {
         Rectangle sailorHitbox = this.getHitbox();
         return sailorHitbox.intersects(block.getHitbox());
     }
 
     /*
-     *
+     * Determines if a Sailor object has collided with any
+     * of the Block objects, and if so, moves the Sailor
+     * back to his previous position.
      */
-    private boolean hasCollided(ArrayList<Block> allBlocks) {
-        for (Block b : allBlocks) {
-            if (this.doesCollide(b)) {
-                return true;
+    private void checkBlockCollisions(Level level) {
+        for (Block b : level.allBlocks) {
+            // Check if the sailor has collided with the block
+            if (this.hasCollided(b)) {
+                moveBack();
+                break;
             }
         }
+    }
 
-        return false;
+    /*
+     * Determines if a Sailor object is within the
+     * level bounds, and if not, moves the Sailor
+     * back to his previous position.
+     */
+    private void checkOutOfBounds(Level level) {
+        if (isOutOfBounds(level.boundaryTopLeft, level.boundaryBottomRight)) {
+            moveBack();
+        }
     }
 }
 

@@ -12,13 +12,13 @@ import java.util.ArrayList;
  */
 public abstract class Person {
     public Image currentImage;
-    public Position position;
-    public Position oldPosition;
+    public int damagePoints;
     public int maxHealthPoints;
     public HealthBar healthBar;
-    public int damagePoints;
+    public Position position;
+    public Position oldPosition;
 
-    public abstract void update(Input input, ArrayList<Block> allBlocks);
+    public abstract void update(Input input, Level level);
 
     public abstract void move(Input input);
 
@@ -44,9 +44,12 @@ public abstract class Person {
     }
 
     /*
-     * Determines whether a child of the `Parent` classes' position is out of bounds
+     * Determines whether a Person object's position is out of bounds
      */
-    public boolean isOutOfBounds(Point TopLeft, Point BottomRight) {
-        return false;
+    public boolean isOutOfBounds(Point topLeft, Point bottomRight) {
+        int personX = position.getX();
+        int personY = position.getY();
+        return !(topLeft.x < personX && personX < bottomRight.x  &&
+                 topLeft.y < personY && personY < bottomRight.y);
     }
 }
