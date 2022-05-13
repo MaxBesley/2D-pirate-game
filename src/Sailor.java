@@ -16,6 +16,10 @@ public class Sailor extends Person {
     // The sailor's internal instance variables
     private final Image SAILOR_LEFT;
     private final Image SAILOR_RIGHT;
+    private final Image SAILOR_HIT_LEFT;
+    private final Image SAILOR_HIT_RIGHT;
+    private boolean isIdle;
+    private boolean isAttacking;
     private static final int SPEED = 1;
 
 
@@ -23,6 +27,8 @@ public class Sailor extends Person {
     public Sailor(int xCoord, int yCoord) {
         SAILOR_LEFT = new Image("res/sailor/sailorLeft.png");
         SAILOR_RIGHT = new Image("res/sailor/sailorRight.png");
+        SAILOR_HIT_LEFT = new Image("res/sailor/sailorHitLeft.png");
+        SAILOR_HIT_RIGHT = new Image("res/sailor/sailorHitRight.png");
         currentImage = SAILOR_RIGHT;
         damagePoints = 15;
         maxHealthPoints = 100;
@@ -30,53 +36,52 @@ public class Sailor extends Person {
         // The position is at the centre of the image (not the top left)
         position = new Position((int) (xCoord + SAILOR_LEFT.getWidth()/2), (int) (yCoord + SAILOR_LEFT.getHeight()/2));
         oldPosition = null;
+        // Initialise the state of the Sailor object
+        isIdle = true;
+        isFacingRight = true;
+        inCooldown = false;
+        isAttacking = false;
     }
 
-    @Override
     public void update(Input input, Level level) {
-        draw();
         drawHealthBar();
 
         move(input);
 
         checkOutOfBounds(level);
         checkBlockCollisions(level);
+        checkAttackKey(input);
+
+
+        draw();
     }
 
-    // For getting the x and y coordinates of the sailor object
-    public int getX() {
-        return position.getX();
-    }
-    public int getY() {
-        return position.getY();
-    }
-
-    @Override
     public void move(Input input) {
         // For moving the sailor left, right, up and down
         if (input.isDown(Keys.LEFT)) {
-            // For collision detection, store a backup copy of the current position and current hitbox
+            // For collision logic, store a backup copy of the current position
             setOldPosition();
             // Update the current position accordingly (i.e. move the sailor)
-            position.setX(getX() - SPEED);
-            // Change the sailor's current image so that he is facing the right way
-            currentImage = SAILOR_LEFT;
+            setX(getX() - SPEED);
+            // Update the sailor's current image (there are four choices)
+            isFacingRight = false;
+            updateCurrentImage();
         }
         if (input.isDown(Keys.RIGHT)) {
             // Similar logic applies for moving right, up and down
             setOldPosition();
-            position.setX(getX() + SPEED);
-            currentImage = SAILOR_RIGHT;
+            setX(getX() + SPEED);
+            isFacingRight = true;
+            updateCurrentImage();
         }
         if (input.isDown(Keys.UP)) {
             setOldPosition();
-            position.setY(getY() - SPEED);
+            setY(getY() - SPEED);
         }
         if (input.isDown(Keys.DOWN)) {
             setOldPosition();
-            position.setY(getY() + SPEED);
+            setY(getY() + SPEED);
         }
-
     }
 
     /*
@@ -93,6 +98,25 @@ public class Sailor extends Person {
      */
     private void moveBack(){
         position = oldPosition;
+    }
+
+    private void updateCurrentImage() {
+        if (isIdle) {
+            if (isFacingRight) {
+                currentImage = SAILOR_RIGHT;
+            } else {
+                currentImage = SAILOR_LEFT;
+            }
+        } else if (isAttacking) {
+            if (isFacingRight) {
+                currentImage = SAILOR_HIT_RIGHT;
+            } else {
+                currentImage = SAILOR_HIT_LEFT;
+            }
+        } else {
+            System.err.println("Error: the sailor must be either idle OR attacking");
+            System.exit(1);
+        }
     }
 
     /*
@@ -142,5 +166,15 @@ public class Sailor extends Person {
             moveBack();
         }
     }
+
+    private void checkAttackKey(Input input) {
+        if (input.wasPressed(Keys.S) && isIdle && canAttack()) {
+            isIdle = false;
+            isAttacking = true;
+            updateCurrentImage();
+        }
+    }
+
+
 }
 

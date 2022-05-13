@@ -4,7 +4,6 @@ import bagel.Image;
 import bagel.Input;
 import bagel.util.Point;
 import bagel.util.Rectangle;
-
 import java.util.ArrayList;
 
 /**
@@ -17,23 +16,31 @@ public abstract class Person {
     public HealthBar healthBar;
     public Position position;
     public Position oldPosition;
+    public boolean inCooldown;
+    public boolean isFacingRight;
 
-    public abstract void update(Input input, Level level);
-
-    public abstract void move(Input input);
 
     /*
      * Method for drawing a child of the `Parent` class to the screen
      */
     public void draw() {
-        currentImage.draw(position.getX(), position.getY());
+        currentImage.draw(getX(), getY());
     }
 
-    /*
-     *
-     */
-    public HealthBar getHealthBar() {
-        return healthBar;
+    // For getting the x and y coordinates of the Person object
+    public int getX() {
+        return position.getX();
+    }
+    public int getY() {
+        return position.getY();
+    }
+
+    // For setting the x and y coordinates of the Person object
+    public void setX(int x) {
+        position.setX(x);
+    }
+    public void setY(int y) {
+        position.setY(y);
     }
 
     /*
@@ -44,11 +51,18 @@ public abstract class Person {
     }
 
     /*
+     * Determines whether a Person object can perform an attack
+     */
+    public boolean canAttack() {
+        return !inCooldown;
+    }
+
+    /*
      * Determines whether a Person object's position is out of bounds
      */
     public boolean isOutOfBounds(Point topLeft, Point bottomRight) {
-        int personX = position.getX();
-        int personY = position.getY();
+        int personX = getX();
+        int personY = getY();
         return !(topLeft.x < personX && personX < bottomRight.x  &&
                  topLeft.y < personY && personY < bottomRight.y);
     }
