@@ -18,8 +18,6 @@ public class HealthBar {
     private final int maxHealthPoints;
     // Constants for drawing the health bar
     private static final int HEALTH_BAR_SIZE = 30;
-    private final Font font = new Font("res/wheaton.otf", HEALTH_BAR_SIZE);
-    private static final Point HEALTH_BAR_POINT = new Point(10, 25);
     // Constants that define when the health bar should change colour
     private static final int GREEN_THRESHOLD = 65;
     private static final int ORANGE_THRESHOLD = 35;
@@ -54,13 +52,17 @@ public class HealthBar {
         currHealthPoints = newHealthPoints;
     }
 
-    // For getting the current amount of health as a percentage
-    public int getHealthPercentage() {
+    private int getHealthPercentage() {
         return (int) Math.round(currHealthPoints * 100.0 / maxHealthPoints);
     }
 
-    // Draws the amount of health (as a percentage) to the screen
-    public void drawToScreen() {
+    /*
+     * Draws the amount of health (as a percentage) to the
+     * screen at the coordinate specified by `x` and `y`.
+     * The health bar image size is passed as a parameter.
+     */
+    public void draw(int x, int y, int size) {
+        Font font = new Font("res/wheaton.otf", size);
         DrawOptions options = new DrawOptions();
         int percentage = this.getHealthPercentage();
 
@@ -76,6 +78,6 @@ public class HealthBar {
         }
 
         // Now draw the text to the screen
-        font.drawString(percentage + "%", HEALTH_BAR_POINT.x, HEALTH_BAR_POINT.y, options);
+        font.drawString(percentage + "%", x, y, options);
     }
 }

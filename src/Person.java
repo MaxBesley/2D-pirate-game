@@ -14,6 +14,9 @@ public abstract class Person {
     public int damagePoints;
     public int maxHealthPoints;
     public HealthBar healthBar;
+    public int healthBarSize;
+    public Timer stateTimer;
+    public Timer attackCooldownTimer;
     public Position position;
     public Position oldPosition;
     public boolean inCooldown;
@@ -43,6 +46,11 @@ public abstract class Person {
         position.setY(y);
     }
 
+    // Method for getting the health points the sailor has (but not as a percentage!)
+    public int getHealthPoints() {
+        return healthBar.getCurrHealthPoints();
+    }
+
     /*
      * Determines whether a Person object is dead or alive
      */
@@ -58,6 +66,19 @@ public abstract class Person {
     }
 
     /*
+     * Method that gets the hitbox of a Person object.
+     */
+    public Rectangle getHitbox() {
+        return currentImage.getBoundingBoxAt(new Point(getX(), getY()));
+    }
+
+    // Method for decreasing the current health of the sailor
+    public void reduceHealth(int amount) {
+        int currentHealth = this.getHealthPoints();
+        healthBar.setCurrHealthPoints(currentHealth - amount);
+    }
+
+    /*
      * Determines whether a Person object's position is out of bounds
      */
     public boolean isOutOfBounds(Point topLeft, Point bottomRight) {
@@ -65,5 +86,18 @@ public abstract class Person {
         int personY = getY();
         return !(topLeft.x < personX && personX < bottomRight.x  &&
                  topLeft.y < personY && personY < bottomRight.y);
+    }
+
+    /*
+     * Method that updates the states of the two
+     * Timer objects (assuming they're activated)
+     */
+    public void updateTimers() {
+        if (stateTimer.isOn()) {
+            stateTimer.update();
+        }
+        if (attackCooldownTimer.isOn()) {
+            attackCooldownTimer.update();
+        }
     }
 }

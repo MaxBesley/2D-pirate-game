@@ -21,6 +21,10 @@ public class Sailor extends Person {
     private boolean isIdle;
     private boolean isAttacking;
     private static final int SPEED = 1;
+    private static final double ATTACK_STATE_LEN = 1000.0;
+    private static final double ATTACK_COOLDOWN_LEN = 2000.0;
+    private static final int HEALTH_BAR_X = 10;
+    private static final int HEALTH_BAR_Y = 25;
 
 
     // Constructor
@@ -33,27 +37,41 @@ public class Sailor extends Person {
         damagePoints = 15;
         maxHealthPoints = 100;
         healthBar = new HealthBar(maxHealthPoints);
+        healthBarSize = 30;
+        stateTimer = new Timer(ATTACK_STATE_LEN);
+        attackCooldownTimer = new Timer(ATTACK_COOLDOWN_LEN);
         // The position is at the centre of the image (not the top left)
         position = new Position((int) (xCoord + SAILOR_LEFT.getWidth()/2), (int) (yCoord + SAILOR_LEFT.getHeight()/2));
         oldPosition = null;
         // Initialise the state of the Sailor object
-        isIdle = true;
-        isFacingRight = true;
         inCooldown = false;
+        isFacingRight = true;
+        isIdle = true;
         isAttacking = false;
     }
 
+    /*
+     * Method that updates the internal state of a Sailor object.
+     * Using both the input from the player and the state of
+     * the level that the sailor is contained in.
+     */
     public void update(Input input, Level level) {
-        drawHealthBar();
+        /* Note that the methods move(), checkOutOfBounds(),
+           checkBlockCollisions(), checkAttackKey() and
+           updateTimers() might do nothing at all. */
 
         move(input);
 
         checkOutOfBounds(level);
         checkBlockCollisions(level);
-        checkAttackKey(input);
 
+        attack(input, level);
 
+        updateTimers();
+
+        updateCurrentImage();
         draw();
+        healthBar.draw(HEALTH_BAR_X, HEALTH_BAR_Y, healthBarSize);
     }
 
     public void move(Input input) {
@@ -65,14 +83,12 @@ public class Sailor extends Person {
             setX(getX() - SPEED);
             // Update the sailor's current image (there are four choices)
             isFacingRight = false;
-            updateCurrentImage();
         }
         if (input.isDown(Keys.RIGHT)) {
             // Similar logic applies for moving right, up and down
             setOldPosition();
             setX(getX() + SPEED);
             isFacingRight = true;
-            updateCurrentImage();
         }
         if (input.isDown(Keys.UP)) {
             setOldPosition();
@@ -85,7 +101,7 @@ public class Sailor extends Person {
     }
 
     /*
-     * Method that sets `oldPosition` to be identical to `position`
+     * Method that sets `oldPosition` to be identical to `position`.
      */
     private void setOldPosition() {
         // The old position should be a copy of the current position
@@ -94,7 +110,7 @@ public class Sailor extends Person {
     }
 
     /**
-     * Moves the Sailor object back to its previous position
+     * Moves the Sailor object back to its previous position.
      */
     private void moveBack(){
         position = oldPosition;
@@ -114,31 +130,25 @@ public class Sailor extends Person {
                 currentImage = SAILOR_HIT_LEFT;
             }
         } else {
-            System.err.println("Error: the sailor must be either idle OR attacking");
+            System.err.println("Error: sailor must be either idle OR attacking");
             System.exit(1);
         }
     }
 
     /*
-     * Draws the health percentage the Sailor object currently has to the screen
-     */
-    private void drawHealthBar() {
-        healthBar.drawToScreen();
-    }
-
-    /*
-     * Method that gets the hitbox of the Sailor object
-     */
-    public Rectangle getHitbox() {
-        return currentImage.getBoundingBoxAt(new Point(getX(), getY()));
-    }
-
-    /*
-     * Method that determines if a Sailor object has collided with the passed Block object
+     * Method that determines if a Sailor object has collided with the passed Block object.
      */
     private boolean hasCollided(Block block) {
         Rectangle sailorHitbox = this.getHitbox();
         return sailorHitbox.intersects(block.getHitbox());
+    }
+
+    /*
+     * Method that determines if a Sailor object has collided with the passed Pirate object.
+     */
+    private boolean hasCollided(Pirate pirate) {
+        Rectangle sailorHitbox = this.getHitbox();
+        return sailorHitbox.intersects(pirate.getHitbox());
     }
 
     /*
@@ -167,14 +177,39 @@ public class Sailor extends Person {
         }
     }
 
+    private void attack(Input input, Level level) {
+        // Check if the sailor should enter the attack state
+        checkAttackKey(input);
+        // If the sailor is idle then just exit this method
+        if (isIdle) {
+            return;
+        }
+        // If the timer is on then the sailor
+        // is still in the attack state
+        if (stateTimer.isOn()) {
+            for (Pirate p : level.allPirates) {
+                // Check if the sailor has collided with the block
+                if (this.hasCollided(p)) {
+                    p.getHit(damagePoints);
+                }
+            }
+        } else {
+            // Revert back to the idle state
+            isIdle = true;
+            isAttacking = false;
+            // Reset the timer for next time
+            stateTimer.reset();
+        }
+    }
+
     private void checkAttackKey(Input input) {
         if (input.wasPressed(Keys.S) && isIdle && canAttack()) {
+            // Enter the attack state
             isIdle = false;
             isAttacking = true;
-            updateCurrentImage();
+            stateTimer.turnOn();
         }
     }
 
 
 }
-

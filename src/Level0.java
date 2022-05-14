@@ -4,6 +4,7 @@ import bagel.Image;
 import bagel.Input;
 import bagel.Keys;
 import bagel.Window;
+import bagel.util.Point;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -19,10 +20,7 @@ public class Level0 extends Level {
     private static final int COMPLETE_MSG_LEN = 3000;
     private static final int LADDER_X = 990;
     private static final int LADDER_Y = 630;
-    private Sailor sailor;
-    private ArrayList<Block> allBlocks = new ArrayList<Block>();
-    private ArrayList<Pirate> allPirates = new ArrayList<Pirate>();
-    //private Projectile[] allProjectiles;
+
 
     public Level0() {
         super();
@@ -42,13 +40,15 @@ public class Level0 extends Level {
 
         if (levelOn && !levelWon) {
             renderBackground();
+            /*
             for (Block b : allBlocks) {
                 b.update();
             }
+            */
             for (Pirate p : allPirates) {
-                p.update(null, null);
+                p.update();
             }
-            sailor.update(input, allBlocks);
+            sailor.update(input, this);
         }
 
         if (isComplete()) {
@@ -89,6 +89,7 @@ public class Level0 extends Level {
      *
      */
     public void readCSV(String fileName) {
+        int x, y;
         String line;
         String[] fields;
 
@@ -104,20 +105,23 @@ public class Level0 extends Level {
 
             // Process the rest of the CSV file and create various objects
             while ((line = br.readLine()) != null) {
+                // Get the fields and store the second and third fields
                 fields = line.split(",");
+                x = Integer.parseInt(fields[1]);
+                y = Integer.parseInt(fields[2]);
+                // Create and store the appropriate object
                 switch (fields[0]) {
                     case "Block":
-                        allBlocks.add(new Block(Integer.parseInt(fields[1]), Integer.parseInt(fields[2])));
+                        //allBlocks.add(new Block(x, y));
                         break;
                     case "Pirate":
-                        allPirates.add(new Pirate(Integer.parseInt(fields[1]), Integer.parseInt(fields[2])));
-                        break;
-                    case "Blackbeard":
-                        //allPirates.add(new Blackbeard(Integer.parseInt(fields[1]), Integer.parseInt(fields[2])));
+                        allPirates.add(new Pirate(x, y));
                         break;
                     case "TopLeft":
+                        boundaryTopLeft = new Point(x, y);
                         break;
                     case "BottomRight":
+                        boundaryBottomRight = new Point(x, y);
                         break;
                     default:
                         System.err.println("Error: the CSV file has an invalid field in the first column");

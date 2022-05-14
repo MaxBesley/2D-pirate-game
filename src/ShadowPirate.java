@@ -65,4 +65,11 @@ public class ShadowPirate extends AbstractGame {
 
 
     }
+
+    /*
+     * Method that returns the `REFRESH_RATE` constant integer.
+     */
+    public static int getRefreshRate() {
+        return REFRESH_RATE;
+    }
 }
