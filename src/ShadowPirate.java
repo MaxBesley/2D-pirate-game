@@ -23,6 +23,8 @@ public class ShadowPirate extends AbstractGame {
     private static final String WORLD_FILE0 = "res/level0.csv";
     private static final String WORLD_FILE1 = "res/level1.csv";
 
+    private static int totalFramesRendered = 0;   // Counts the number of calls to `update()`
+
     private Sailor sailor;
     private boolean gameHasEnded;
     private boolean playerHasWon;
@@ -37,6 +39,8 @@ public class ShadowPirate extends AbstractGame {
         super(WINDOW_WIDTH, WINDOW_HEIGHT, GAME_TITLE);
         // Initialise level 0 using the world file
         level0.readCSV(WORLD_FILE0);
+        //level0.allBlocks.clear(); level0.allBlocks.add(new Block(400, 200));
+        //level0.allPirates.clear(); level0.allPirates.add(new Pirate(400, 400));
         // Set the initial state of the game
         gameHasEnded = false;
         playerHasWon = false;
@@ -63,13 +67,20 @@ public class ShadowPirate extends AbstractGame {
 
         level0.update(input);
 
-
+        totalFramesRendered++;
     }
 
     /*
-     * Method that returns the `REFRESH_RATE` constant integer.
+     * Returns the `REFRESH_RATE` constant integer.
      */
     public static int getRefreshRate() {
         return REFRESH_RATE;
+    }
+
+    /*
+     * Returns the `totalFramesRendered` integer counter.
+     */
+    public static int getTotalFramesRendered() {
+        return totalFramesRendered;
     }
 }

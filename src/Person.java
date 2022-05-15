@@ -22,6 +22,14 @@ public abstract class Person {
     public boolean inCooldown;
     public boolean isFacingRight;
 
+    /* These variables below ensure that a person doesn't
+       get stuck on a block or level edge forever. */
+    public boolean justCollided;
+    public Timer collisionTimer;
+    /* Once a collision has occurred, collision detection will
+       be halted for `COLLISION_PAUSE_LEN` milliseconds. */
+    public static final int COLLISION_PAUSE_LEN = 100;
+
 
     /*
      * Method for drawing a child of the `Parent` class to the screen
@@ -66,6 +74,14 @@ public abstract class Person {
     }
 
     /*
+     * Method that determines if a Person object has collided with the passed Block object.
+     */
+    public boolean hasCollided(Block block) {
+        Rectangle hitbox = this.getHitbox();
+        return hitbox.intersects(block.getHitbox());
+    }
+
+    /*
      * Method that gets the hitbox of a Person object.
      */
     public Rectangle getHitbox() {
@@ -89,8 +105,8 @@ public abstract class Person {
     }
 
     /*
-     * Method that updates the states of the two
-     * Timer objects (assuming they're activated)
+     * Updates the states the person's Timer
+     * objects (assuming they're activated)
      */
     public void updateTimers() {
         if (stateTimer.isOn()) {
@@ -98,6 +114,9 @@ public abstract class Person {
         }
         if (attackCooldownTimer.isOn()) {
             attackCooldownTimer.update();
+        }
+        if (collisionTimer.isOn()) {
+            collisionTimer.update();
         }
     }
 }

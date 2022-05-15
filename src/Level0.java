@@ -40,14 +40,15 @@ public class Level0 extends Level {
 
         if (levelOn && !levelWon) {
             renderBackground();
-            /*
+
             for (Block b : allBlocks) {
                 b.update();
             }
-            */
+
             for (Pirate p : allPirates) {
-                p.update();
+                p.update(this);
             }
+
             sailor.update(input, this);
         }
 
@@ -112,7 +113,7 @@ public class Level0 extends Level {
                 // Create and store the appropriate object
                 switch (fields[0]) {
                     case "Block":
-                        //allBlocks.add(new Block(x, y));
+                        allBlocks.add(new Block(x, y));
                         break;
                     case "Pirate":
                         allPirates.add(new Pirate(x, y));

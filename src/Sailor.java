@@ -40,6 +40,7 @@ public class Sailor extends Person {
         healthBarSize = 30;
         stateTimer = new Timer(ATTACK_STATE_LEN);
         attackCooldownTimer = new Timer(ATTACK_COOLDOWN_LEN);
+        collisionTimer = new Timer(COLLISION_PAUSE_LEN);
         // The position is at the centre of the image (not the top left)
         position = new Position((int) (xCoord + SAILOR_LEFT.getWidth()/2), (int) (yCoord + SAILOR_LEFT.getHeight()/2));
         oldPosition = null;
@@ -48,6 +49,7 @@ public class Sailor extends Person {
         isFacingRight = true;
         isIdle = true;
         isAttacking = false;
+        justCollided = false;
     }
 
     /*
@@ -136,14 +138,6 @@ public class Sailor extends Person {
     }
 
     /*
-     * Method that determines if a Sailor object has collided with the passed Block object.
-     */
-    private boolean hasCollided(Block block) {
-        Rectangle sailorHitbox = this.getHitbox();
-        return sailorHitbox.intersects(block.getHitbox());
-    }
-
-    /*
      * Method that determines if a Sailor object has collided with the passed Pirate object.
      */
     private boolean hasCollided(Pirate pirate) {
@@ -153,7 +147,7 @@ public class Sailor extends Person {
 
     /*
      * Determines if a Sailor object has collided with any
-     * of the Block objects, and if so, moves the Sailor
+     * of the Block objects, and if so, moves the sailor
      * back to his previous position.
      */
     private void checkBlockCollisions(Level level) {
@@ -188,7 +182,7 @@ public class Sailor extends Person {
         // is still in the attack state
         if (stateTimer.isOn()) {
             for (Pirate p : level.allPirates) {
-                // Check if the sailor has collided with the block
+                // Check if the sailor has collided with (attacked) the pirate
                 if (this.hasCollided(p)) {
                     p.getHit(damagePoints);
                 }
