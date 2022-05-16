@@ -2,7 +2,6 @@
 
 import bagel.DrawOptions;
 import bagel.Font;
-import bagel.util.Point;
 import bagel.util.Colour;
 
 /**
@@ -61,7 +60,7 @@ public class HealthBar {
      * screen at the coordinate specified by `x` and `y`.
      * The health bar image size is passed as a parameter.
      */
-    public void draw(int x, int y, int size) {
+    public void draw(double x, double y, int size) {
         Font font = new Font("res/wheaton.otf", size);
         DrawOptions options = new DrawOptions();
         int percentage = this.getHealthPercentage();

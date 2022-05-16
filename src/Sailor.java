@@ -3,14 +3,10 @@
 import bagel.Image;
 import bagel.Input;
 import bagel.Keys;
-import bagel.util.Point;
 import bagel.util.Rectangle;
-
-import java.util.ArrayList;
 
 /**
  * Represents the sailor in the ShadowPirate game (i.e. the player).
- * Note that this class is mutable.
  */
 public class Sailor extends Person {
     // The sailor's internal instance variables
@@ -27,7 +23,9 @@ public class Sailor extends Person {
     private static final int HEALTH_BAR_Y = 25;
 
 
-    // Constructor
+    /**
+     * Creates a sailor at an initial (x, y) position.
+     */
     public Sailor(int xCoord, int yCoord) {
         SAILOR_LEFT = new Image("res/sailor/sailorLeft.png");
         SAILOR_RIGHT = new Image("res/sailor/sailorRight.png");
@@ -40,22 +38,20 @@ public class Sailor extends Person {
         healthBarSize = 30;
         stateTimer = new Timer(ATTACK_STATE_LEN);
         attackCooldownTimer = new Timer(ATTACK_COOLDOWN_LEN);
-        collisionTimer = new Timer(COLLISION_PAUSE_LEN);
         // The position is at the centre of the image (not the top left)
-        position = new Position((int) (xCoord + SAILOR_LEFT.getWidth()/2), (int) (yCoord + SAILOR_LEFT.getHeight()/2));
+        position = new Position(xCoord + SAILOR_LEFT.getWidth()/2, yCoord + SAILOR_LEFT.getHeight()/2);
         oldPosition = null;
         // Initialise the state of the Sailor object
         inCooldown = false;
         isFacingRight = true;
         isIdle = true;
         isAttacking = false;
-        justCollided = false;
     }
 
-    /*
+    /**
      * Method that updates the internal state of a Sailor object.
-     * Using both the input from the player and the state of
-     * the level that the sailor is contained in.
+     * @param input This is the input from the game's user.
+     * @param level This is the level the sailor is contained in.
      */
     public void update(Input input, Level level) {
         /* Note that the methods move(), checkOutOfBounds(),
@@ -64,8 +60,7 @@ public class Sailor extends Person {
 
         move(input);
 
-        checkOutOfBounds(level);
-        checkBlockCollisions(level);
+        checkCollisions(level);
 
         attack(input, level);
 
@@ -76,6 +71,9 @@ public class Sailor extends Person {
         healthBar.draw(HEALTH_BAR_X, HEALTH_BAR_Y, healthBarSize);
     }
 
+    /**
+     * Moves the sailor forward based on the user's input.
+     */
     public void move(Input input) {
         // For moving the sailor left, right, up and down
         if (input.isDown(Keys.LEFT)) {
@@ -85,18 +83,15 @@ public class Sailor extends Person {
             setX(getX() - SPEED);
             // Update the sailor's current image (there are four choices)
             isFacingRight = false;
-        }
-        if (input.isDown(Keys.RIGHT)) {
+        } else if (input.isDown(Keys.RIGHT)) {
             // Similar logic applies for moving right, up and down
             setOldPosition();
             setX(getX() + SPEED);
             isFacingRight = true;
-        }
-        if (input.isDown(Keys.UP)) {
+        } else if (input.isDown(Keys.UP)) {
             setOldPosition();
             setY(getY() - SPEED);
-        }
-        if (input.isDown(Keys.DOWN)) {
+        } else if (input.isDown(Keys.DOWN)) {
             setOldPosition();
             setY(getY() + SPEED);
         }
@@ -119,6 +114,7 @@ public class Sailor extends Person {
     }
 
     private void updateCurrentImage() {
+        // Determine what the current image should be
         if (isIdle) {
             if (isFacingRight) {
                 currentImage = SAILOR_RIGHT;
@@ -145,29 +141,28 @@ public class Sailor extends Person {
         return sailorHitbox.intersects(pirate.getHitbox());
     }
 
-    /*
-     * Determines if a Sailor object has collided with any
-     * of the Block objects, and if so, moves the sailor
-     * back to his previous position.
-     */
-    private void checkBlockCollisions(Level level) {
-        for (Block b : level.allBlocks) {
-            // Check if the sailor has collided with the block
-            if (this.hasCollided(b)) {
-                moveBack();
-                break;
-            }
+    /* Determines if the sailor has collided with any of
+       the blocks or a level edge, and if so, moves the
+       sailor back to its previous position. */
+    private void checkCollisions(Level level) {
+        checkLevelEdgeCollisions(level);
+        checkBlockCollisions(level);
+    }
+
+    private void checkLevelEdgeCollisions(Level level) {
+        // Check for a level boundary collision
+        if (isOutOfBounds(level.boundaryTopLeft, level.boundaryBottomRight)) {
+            moveBack();
         }
     }
 
-    /*
-     * Determines if a Sailor object is within the
-     * level bounds, and if not, moves the Sailor
-     * back to his previous position.
-     */
-    private void checkOutOfBounds(Level level) {
-        if (isOutOfBounds(level.boundaryTopLeft, level.boundaryBottomRight)) {
-            moveBack();
+    private void checkBlockCollisions(Level level) {
+        // Check for a block collision
+        for (Block b : level.allBlocks) {
+            if (hasCollided(b)) {
+                moveBack();
+                break;
+            }
         }
     }
 
@@ -191,8 +186,6 @@ public class Sailor extends Person {
             // Revert back to the idle state
             isIdle = true;
             isAttacking = false;
-            // Reset the timer for next time
-            stateTimer.reset();
         }
     }
 

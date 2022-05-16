@@ -1,11 +1,12 @@
 /* Max Besley. May 2022. */
 
 import bagel.Image;
-import bagel.util.Point;
 import bagel.util.Rectangle;
 import java.util.Random;
 
-
+/**
+ * Represents a pirate in the ShadowPirate game.
+ */
 public class Pirate extends Person {
     private final Image PIRATE_LEFT;
     private final Image PIRATE_RIGHT;
@@ -22,15 +23,24 @@ public class Pirate extends Person {
     private final double SPEED;
     private Direction direction;
     private boolean isInvincible;
-    private static final int FRAMES_PER_MOVE = 4;
+
+    /* These attributes below ensure that a pirate doesn't
+       get stuck on a block.
+       Once a collision has occurred, collision detection will
+       be halted for `COLLISION_PAUSE_LEN` milliseconds. */
+    private boolean justCollidedWithBlock;
+    private Timer collisionPauseTimer;
+    private static final int COLLISION_PAUSE_LEN = 100;
 
 
-    // Constructor
+    /**
+     * Creates a pirate at an initial (x, y) position.
+     */
     public Pirate(int xCoord, int yCoord) {
         PIRATE_LEFT = new Image("res/pirate/pirateLeft.png");
         PIRATE_RIGHT = new Image("res/pirate/pirateRight.png");
         PIRATE_INVINC_LEFT = new Image("res/pirate/pirateHitLeft.png");
-        PIRATE_INVINC_RIGHT = new Image("res/pirate/pirateHitLeft.png");
+        PIRATE_INVINC_RIGHT = new Image("res/pirate/pirateHitRight.png");
         PIRATE_PROJECTILE_IMAGE = new Image("res/pirate/pirateProjectile.png");
         currentImage = PIRATE_RIGHT;
         damagePoints = 10;
@@ -39,8 +49,8 @@ public class Pirate extends Person {
         healthBarSize = 15;
         stateTimer = new Timer(invincStateLen);
         attackCooldownTimer = new Timer(attackCooldownLen);
-        collisionTimer = new Timer(COLLISION_PAUSE_LEN);
-        position = new Position((int) (xCoord + PIRATE_LEFT.getWidth()/2), (int) (yCoord + PIRATE_LEFT.getHeight()/2));
+        collisionPauseTimer = new Timer(COLLISION_PAUSE_LEN);
+        position = new Position(xCoord + PIRATE_LEFT.getWidth()/2, yCoord + PIRATE_LEFT.getHeight()/2);
         oldPosition = null;
         // Assign a random speed value using the formula below
         Random r = new Random();
@@ -51,15 +61,18 @@ public class Pirate extends Person {
         inCooldown = false;
         isInvincible = false;
         isFacingRight = true;
-        justCollided = false;
-        System.out.println("SPEED = " + SPEED + " DIR = " + direction.getCurrentDir());
+        justCollidedWithBlock = false;
     }
 
+    /**
+     * Updates the internal state of a Pirate object.
+     * @param level This is the level the pirate is contained in.
+     */
     public void update(Level level) {
 
         move();
 
-        checkBlockCollisions(level);
+        checkCollisions(level);
 
         updateTimers();
 
@@ -69,33 +82,30 @@ public class Pirate extends Person {
 
         updateCurrentImage();
         draw();
-        healthBar.draw((int) (getX() - currentImage.getWidth()/2),
-                       (int) (getY() - currentImage.getHeight()/2 - HEALTH_BAR_Y_OFFSET), healthBarSize);
+        healthBar.draw(getX() - currentImage.getWidth()/2,
+                       getY() - currentImage.getHeight()/2 - HEALTH_BAR_Y_OFFSET, healthBarSize);
     }
 
     /*
      * Moves the pirate forward based on its current direction.
      */
     public void move() {
-        // Only move every `FRAMES_PER_MOVE` frames/updates
-        if ((ShadowPirate.getTotalFramesRendered() % FRAMES_PER_MOVE) != 0) {
-            return;
-        }
-        // Move the pirate
+        // Move the pirate (note: cannot move diagonally)
         if (direction.isMovingLeft()) {
-            setX((int) Math.round(getX() - FRAMES_PER_MOVE * SPEED));
+            setX(getX() - SPEED);
             isFacingRight = false;
         } else if (direction.isMovingRight()) {
-            setX((int) Math.round(getX() + FRAMES_PER_MOVE * SPEED));
+            setX(getX() + SPEED);
             isFacingRight = true;
         }  else if (direction.isMovingUp()) {
-            setY((int) Math.round(getY() - FRAMES_PER_MOVE * SPEED));
+            setY(getY() - SPEED);
         } else if (direction.isMovingDown()) {
-            setY((int) Math.round(getY() + FRAMES_PER_MOVE * SPEED));
+            setY(getY() + SPEED);
         }
     }
 
     private void updateCurrentImage() {
+        // Determine what the current image should be
         if (isInvincible) {
             if (isFacingRight) {
                 currentImage = PIRATE_INVINC_RIGHT;
@@ -111,28 +121,42 @@ public class Pirate extends Person {
         }
     }
 
-    /*
-     * Determines if a Pirate object has collided with any
-     * of the Block objects, and if so, reverses the
-     * pirate's direction.
-     */
+    /* Determines if a pirate has collided with any of
+       the blocks or a level edge, and if so, reverses
+       the pirate's direction. */
+    private void checkCollisions(Level level) {
+        checkLevelEdgeCollisions(level);
+        checkBlockCollisions(level);
+    }
+
+    private void checkLevelEdgeCollisions(Level level) {
+        if (isOutOfBounds(level.boundaryTopLeft, level.boundaryBottomRight)) {
+            direction.reverse();
+        }
+    }
+
     private void checkBlockCollisions(Level level) {
-        if (justCollided) {
+        // Check if the pirate collided with a block not so long ago
+        if (justCollidedWithBlock) {
             // Check if the timer is over yet
-            if (!collisionTimer.isOn()) {
-                justCollided = false;
-                collisionTimer.reset();
+            if (!collisionPauseTimer.isOn()) {
+                justCollidedWithBlock = false;
+            } else {
+                // The timer is on so update its state
+                collisionPauseTimer.update();
             }
             // Skip over collision detection
             return;
         }
+        // Otherwise, check for a block collision
         for (Block b : level.allBlocks) {
-            if (this.hasCollided(b)) {
+            if (hasCollided(b)) {
                 // Start moving the other way
                 direction.reverse();
-                // The timer makes collision logic safer
-                justCollided = true;
-                collisionTimer.turnOn();
+                // Active the timer
+                justCollidedWithBlock = true;
+                collisionPauseTimer.turnOn();
+                // Bye!
                 break;
             }
         }
@@ -170,11 +194,9 @@ public class Pirate extends Person {
         // Recall that there are three different states.
         if (isInvincible && !stateTimer.isOn()) {
             isInvincible = false;
-            stateTimer.reset();
         }
         if (inCooldown && !attackCooldownTimer.isOn()) {
             inCooldown = false;
-            attackCooldownTimer.reset();
         }
     }
 

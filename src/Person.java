@@ -1,13 +1,11 @@
 /* Max Besley. May 2022. */
 
 import bagel.Image;
-import bagel.Input;
 import bagel.util.Point;
 import bagel.util.Rectangle;
-import java.util.ArrayList;
 
 /**
- *
+ * Represents an in-game person (or living thing).
  */
 public abstract class Person {
     public Image currentImage;
@@ -22,14 +20,6 @@ public abstract class Person {
     public boolean inCooldown;
     public boolean isFacingRight;
 
-    /* These variables below ensure that a person doesn't
-       get stuck on a block or level edge forever. */
-    public boolean justCollided;
-    public Timer collisionTimer;
-    /* Once a collision has occurred, collision detection will
-       be halted for `COLLISION_PAUSE_LEN` milliseconds. */
-    public static final int COLLISION_PAUSE_LEN = 100;
-
 
     /*
      * Method for drawing a child of the `Parent` class to the screen
@@ -39,18 +29,18 @@ public abstract class Person {
     }
 
     // For getting the x and y coordinates of the Person object
-    public int getX() {
+    public double getX() {
         return position.getX();
     }
-    public int getY() {
+    public double getY() {
         return position.getY();
     }
 
     // For setting the x and y coordinates of the Person object
-    public void setX(int x) {
+    public void setX(double x) {
         position.setX(x);
     }
-    public void setY(int y) {
+    public void setY(double y) {
         position.setY(y);
     }
 
@@ -60,14 +50,14 @@ public abstract class Person {
     }
 
     /*
-     * Determines whether a Person object is dead or alive
+     * Determines whether a Person object is dead or alive.
      */
     public boolean isAlive() {
         return healthBar.getCurrHealthPoints() > 0;
     }
 
     /*
-     * Determines whether a Person object can perform an attack
+     * Determines whether a Person object can perform an attack.
      */
     public boolean canAttack() {
         return !inCooldown;
@@ -82,7 +72,7 @@ public abstract class Person {
     }
 
     /*
-     * Method that gets the hitbox of a Person object.
+     * Returns the hitbox of a Person object.
      */
     public Rectangle getHitbox() {
         return currentImage.getBoundingBoxAt(new Point(getX(), getY()));
@@ -95,18 +85,18 @@ public abstract class Person {
     }
 
     /*
-     * Determines whether a Person object's position is out of bounds
+     * Determines whether a Person object's position is out of bounds.
      */
     public boolean isOutOfBounds(Point topLeft, Point bottomRight) {
-        int personX = getX();
-        int personY = getY();
+        double personX = getX();
+        double personY = getY();
         return !(topLeft.x < personX && personX < bottomRight.x  &&
                  topLeft.y < personY && personY < bottomRight.y);
     }
 
     /*
-     * Updates the states the person's Timer
-     * objects (assuming they're activated)
+     * Updates the states of the person's Timer
+     * objects (assuming they're activated).
      */
     public void updateTimers() {
         if (stateTimer.isOn()) {
@@ -114,9 +104,6 @@ public abstract class Person {
         }
         if (attackCooldownTimer.isOn()) {
             attackCooldownTimer.update();
-        }
-        if (collisionTimer.isOn()) {
-            collisionTimer.update();
         }
     }
 }
