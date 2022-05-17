@@ -1,10 +1,8 @@
 /* Max Besley. May 2022. */
 
-import bagel.Font;
-import bagel.Image;
-import bagel.Input;
-import bagel.Window;
+import bagel.*;
 import bagel.util.Point;
+import java.util.ArrayList;
 
 /**
  *
@@ -17,30 +15,81 @@ public abstract class Level {
     public final int INSTRUCTION_OFFSET = 70;
     final int FONT_Y_POS = 402;
     final Font FONT = new Font("res/wheaton.otf", MESSAGE_SIZE);
-    public final String START_MESSAGE = "PRESS SPACE TO START";
-    public final String ATTACK_MESSAGE = "PRESS S TO ATTACK";
-    public final String LOSE_MESSAGE = "GAME OVER";
+    public static final String START_MESSAGE = "PRESS SPACE TO START";
+    public static final String ATTACK_MESSAGE = "PRESS S TO ATTACK";
+    public static final String LOSE_MESSAGE = "GAME OVER";
     public boolean levelOn;
     public boolean levelWon;
+    public boolean levelLost;
+    public Sailor sailor;
+    public ArrayList<Block> allBlocks;
+    public ArrayList<Pirate> allPirates;
+    public ArrayList<Projectile> allProjectiles;
 
 
+    /*
+     * Constructor for the abstract class `Level`.
+     */
     public Level() {
         levelOn = false;
         levelWon = false;
+        levelLost = false;
+        allBlocks = new ArrayList<Block>();
+        allPirates = new ArrayList<Pirate>();
+        allProjectiles = new ArrayList<Projectile>();
     }
 
+    /*
+     * Renders the level's background image to the screen.
+     */
     public void renderBackground() {
         BACKGROUND_IMAGE.draw(Window.getWidth()/2.0, Window.getHeight()/2.0);
     }
 
+    /**
+     * Renders the start screen for the player.
+     * @param goalMessage This is the third message to be displayed.
+     */
+    public void drawStartScreen(Input input, String goalMessage) {
+        FONT.drawString(START_MESSAGE, (Window.getWidth()/2.0 - (FONT.getWidth(START_MESSAGE)/2.0)),
+                FONT_Y_POS);
+        FONT.drawString(ATTACK_MESSAGE, (Window.getWidth()/2.0 - (FONT.getWidth(ATTACK_MESSAGE)/2.0)),
+                FONT_Y_POS + INSTRUCTION_OFFSET);
+        FONT.drawString(goalMessage, (Window.getWidth()/2.0 - (FONT.getWidth(goalMessage)/2.0)),
+                FONT_Y_POS + INSTRUCTION_OFFSET + INSTRUCTION_OFFSET);
+        if (input.wasPressed(Keys.SPACE)){
+            levelOn = true;
+        }
+    }
 
     /**
-    *   Method used to read file and create objects
-    */
+     * Renders the end screen for the player.
+     * @param message This is the text to be drawn.
+     */
+    public void drawEndScreen(String message) {
+        FONT.drawString(message, (Window.getWidth()/2.0 - (FONT.getWidth(message)/2.0)), FONT_Y_POS);
+    }
+
+    /*
+     * Determines if the player has lost the game.
+     */
+    public boolean isLost() {
+        // Ask: is the sailor dead or not?
+        return !sailor.isAlive();
+    }
+
+    /*
+     * Reads the CSV world file and creates objects.
+     */
     public abstract void readCSV(String fileName);
 
+    /*
+     * Updates the internal state of a level.
+     */
     public abstract void update(Input input);
 
+    /*
+     * Returns whether the level is complete or not.
+     */
     public abstract boolean isComplete();
-
 }

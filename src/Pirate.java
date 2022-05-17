@@ -8,11 +8,12 @@ import java.util.Random;
  * Represents a pirate in the ShadowPirate game.
  */
 public class Pirate extends Person {
-    private final Image PIRATE_LEFT;
-    private final Image PIRATE_RIGHT;
-    private final Image PIRATE_INVINC_LEFT;
-    private final Image PIRATE_INVINC_RIGHT;
-    private final Image PIRATE_PROJECTILE_IMAGE;
+    private final Image PIRATE_LEFT = new Image("res/pirate/pirateLeft.png");
+    private final Image PIRATE_RIGHT = new Image("res/pirate/pirateRight.png");
+    private final Image PIRATE_INVINC_LEFT = new Image("res/pirate/pirateHitLeft.png");
+    private final Image PIRATE_INVINC_RIGHT = new Image("res/pirate/pirateHitRight.png");
+    private final Image PIRATE_PROJECTILE_IMAGE = new Image("res/pirate/pirateProjectile.png");
+    private static final double PIRATE_PROJECTILE_SPEED = 0.4;
     private static final int HEALTH_BAR_Y_OFFSET = 6;
     Rectangle attackRange;
     private int attackRangeSize = 100;
@@ -22,6 +23,7 @@ public class Pirate extends Person {
     private static final double RAND_UPPER = 0.7;
     private final double SPEED;
     private Direction direction;
+    private boolean toBeDeleted;
     private boolean isInvincible;
 
     /* These attributes below ensure that a pirate doesn't
@@ -37,11 +39,6 @@ public class Pirate extends Person {
      * Creates a pirate at an initial (x, y) position.
      */
     public Pirate(int xCoord, int yCoord) {
-        PIRATE_LEFT = new Image("res/pirate/pirateLeft.png");
-        PIRATE_RIGHT = new Image("res/pirate/pirateRight.png");
-        PIRATE_INVINC_LEFT = new Image("res/pirate/pirateHitLeft.png");
-        PIRATE_INVINC_RIGHT = new Image("res/pirate/pirateHitRight.png");
-        PIRATE_PROJECTILE_IMAGE = new Image("res/pirate/pirateProjectile.png");
         currentImage = PIRATE_RIGHT;
         damagePoints = 10;
         maxHealthPoints = 45;
@@ -58,6 +55,7 @@ public class Pirate extends Person {
         // Assign the Pirate object a random direction
         direction = new Direction();
         // Initialise the state of the Pirate object
+        toBeDeleted = false;
         inCooldown = false;
         isInvincible = false;
         isFacingRight = true;
@@ -69,6 +67,10 @@ public class Pirate extends Person {
      * @param level This is the level the pirate is contained in.
      */
     public void update(Level level) {
+        if (!isAlive()) {
+            toBeDeleted = true;
+            return;
+        }
 
         move();
 
@@ -84,6 +86,13 @@ public class Pirate extends Person {
         draw();
         healthBar.draw(getX() - currentImage.getWidth()/2,
                        getY() - currentImage.getHeight()/2 - HEALTH_BAR_Y_OFFSET, healthBarSize);
+    }
+
+    /*
+     * Returns whether the pirate needs to be deleted from the game.
+     */
+    public boolean isToBeDeleted() {
+        return toBeDeleted;
     }
 
     /*
@@ -163,9 +172,10 @@ public class Pirate extends Person {
     }
 
     /*
-     * Method that causes a pirate to lose health
-     * and then enter the INVINCIBLE state.
+     * Causes a pirate to lose health and
+     * then enter the invincible state.
      */
+    @Override
     public void getHit(int damagePoints) {
         if (!isInvincible) {
             reduceHealth(damagePoints);
@@ -182,9 +192,11 @@ public class Pirate extends Person {
                                         attackRangeSize, attackRangeSize);
             if (attackRange.intersects(level.sailor.getHitbox())) {
                 // BANG!!! Shoot at the sailor
+                level.allProjectiles.add(new Projectile(position, level.sailor.getPosition(), damagePoints,
+                                                        PIRATE_PROJECTILE_SPEED, PIRATE_PROJECTILE_IMAGE));
+                // Now enter the cooldown state
                 inCooldown = true;
                 attackCooldownTimer.turnOn();
-                System.out.println("BANG!");
             }
         }
     }

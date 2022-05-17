@@ -16,7 +16,7 @@ public class Sailor extends Person {
     private final Image SAILOR_HIT_RIGHT;
     private boolean isIdle;
     private boolean isAttacking;
-    private static final int SPEED = 1;
+    private static final int SPEED = 5;
     private static final double ATTACK_STATE_LEN = 1000.0;
     private static final double ATTACK_COOLDOWN_LEN = 2000.0;
     private static final int HEALTH_BAR_X = 10;
@@ -166,6 +166,14 @@ public class Sailor extends Person {
         }
     }
 
+    /*
+     * Causes the sailor to lose health points.
+     */
+    @Override
+    public void getHit(int damagePoints) {
+        reduceHealth(damagePoints);
+    }
+
     private void attack(Input input, Level level) {
         // Check if the sailor should enter the attack state
         checkAttackKey(input);
@@ -197,6 +205,4 @@ public class Sailor extends Person {
             stateTimer.turnOn();
         }
     }
-
-
 }

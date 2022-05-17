@@ -44,6 +44,13 @@ public abstract class Person {
         position.setY(y);
     }
 
+    /*
+     * Returns the current position of the Person object.
+     */
+    public Position getPosition() {
+        return position;
+    }
+
     // Method for getting the health points the sailor has (but not as a percentage!)
     public int getHealthPoints() {
         return healthBar.getCurrHealthPoints();
@@ -106,4 +113,9 @@ public abstract class Person {
             attackCooldownTimer.update();
         }
     }
+
+    /*
+     * Inflicts `damagePoints` damage on the Person object.
+     */
+    public abstract void getHit(int damagePoints);
 }
