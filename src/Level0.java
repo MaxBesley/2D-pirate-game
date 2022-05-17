@@ -2,12 +2,12 @@
 
 import bagel.Image;
 import bagel.Input;
-import bagel.Keys;
 import bagel.Window;
 import bagel.util.Point;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * The first level of the ShadowPirate game.
@@ -15,26 +15,28 @@ import java.io.IOException;
 public class Level0 extends Level {
     private static final String LADDER_MESSAGE = "USE ARROW KEYS TO FIND LADDER";
     private static final String COMPLETE_MESSAGE = "LEVEL COMPLETE!";
-    private static final int COMPLETE_MSG_LEN = 3000;
+    private Timer completeScreenTimer;
+    private static final int COMPLETE_SCREEN_DURATION = 3000;
     private static final int LADDER_X = 990;
     private static final int LADDER_Y = 630;
+    private boolean readyToTransition;
 
 
-    /*
+    /**
      * Creates the first level of ShadowPirate.
      */
     public Level0() {
         super();
-        BACKGROUND_IMAGE = new Image("res/background0.png");
+        completeScreenTimer = new Timer(COMPLETE_SCREEN_DURATION);
+        backgroundImage = new Image("res/background0.png");
+        readyToTransition = false;
     }
 
-    /*
+    /**
      * Updates the internal state of level 1
      * based on the game user's keyboard inputs.
      */
-    @Override
     public void update(Input input) {
-        // in next commit say "fully implemented projectiles and pirate attack as well as sailor game over screen"
 
         if (!levelOn) {
             drawStartScreen(input, LADDER_MESSAGE);
@@ -42,6 +44,10 @@ public class Level0 extends Level {
 
         if (levelWon) {
             drawEndScreen(COMPLETE_MESSAGE);
+            completeScreenTimer.update();
+            if (completeScreenTimer.isOff()) {
+                readyToTransition = true;
+            }
         }
 
         if (levelLost) {
@@ -52,11 +58,9 @@ public class Level0 extends Level {
             // Draw the background image
             renderBackground();
 
-            for (Block b : allBlocks) { // can we shorten this into a single line?
+            for (Block b : allBlocks) {
                 b.update(sailor);
             }
-            // Remove any bombs that have exploded and should now vanish
-            //allBlocks.removeIf(Block::isToBeDeleted);
 
             for (Pirate p : allPirates) {
                 p.update(this);
@@ -64,38 +68,44 @@ public class Level0 extends Level {
             // Remove/delete any pirates that should no longer be updated
             allPirates.removeIf(Pirate::isToBeDeleted);
 
-            // Update the sailor
-            sailor.update(input, this);
-
             for (Projectile p : allProjectiles) {
                 p.update(this);
             }
             // For performance reasons remove redundant projectiles
             allProjectiles.removeIf(Projectile::isToBeDeleted);
+
+            // Update the sailor
+            sailor.update(input, this);
         }
 
         // Check if the player completed level0
         if (isComplete()) {
             levelWon = true;
+            completeScreenTimer.turnOn();
         }
         // Otherwise, check if the player died
         else if (isLost()) {
             levelLost = true;
         }
-
     }
 
-    /*
-     * Determines if the player has complete/won the first level (i.e. level0).
+    /**
+     * Determines if the player has completed/won the first level (i.e. level0).
      */
-    @Override
     public boolean isComplete() {
         // Check whether the sailor has reached the ladder
         return sailor.getX() >= LADDER_X && sailor.getY() > LADDER_Y;
     }
 
-    /*
+    /**
      *
+     */
+    public boolean isReadyToTransition() {
+        return readyToTransition;
+    }
+
+    /**
+     * Method used to process world files and create objects.
      */
     public void readCSV(String fileName) {
         int x, y;
