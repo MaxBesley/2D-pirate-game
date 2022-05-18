@@ -2,9 +2,6 @@
 
 import bagel.Input;
 import bagel.Image;
-import bagel.Input;
-import bagel.Keys;
-import bagel.Window;
 import bagel.util.Point;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -18,7 +15,7 @@ public class Level1 extends Level {
     private static final String WIN_MESSAGE = "CONGRATULATIONS!";
     private static final String TREASURE_MESSAGE = "FIND THE TREASURE";
     private Treasure treasure;
-    private ArrayList<Item> items;
+    private ArrayList<Item> allItems;
 
 
     /**
@@ -26,7 +23,7 @@ public class Level1 extends Level {
      */
     public Level1() {
         super();
-        items = new ArrayList<Item>();
+        allItems = new ArrayList<Item>();
         backgroundImage = new Image("res/background1.png");
     }
 
@@ -53,6 +50,8 @@ public class Level1 extends Level {
             for (Block b : allBlocks) {
                 b.update(sailor);
             }
+            // Remove any bombs that have exploded and should now vanish
+            allBlocks.removeIf(Block::isToBeDeleted);
 
             for (Pirate p : allPirates) {
                 p.update(this);
@@ -64,19 +63,32 @@ public class Level1 extends Level {
             }
             allProjectiles.removeIf(Projectile::isToBeDeleted);
 
-            sailor.update(input, this);
-        }
+            // Update all the stationary items
+            for (Item i : allItems) {
+                i.update(sailor);
+            }
+            allItems.removeIf(Item::isToBeDeleted);
 
-        // Remove any bombs that have exploded and should now vanish
-        //allBlocks.removeIf(Block::isToBeDeleted);
+            // Draw the treasure
+            treasure.draw();
+
+            sailor.update(input, this);
+
+            if (isComplete()) {
+                levelWon = true;
+            }
+            else if (isLost()) {
+                levelLost = true;
+            }
+        }
     }
 
     /**
      * Determines if the player has won the second level (i.e. level1).
      */
     public boolean isComplete() {
-        // Check whether the sailor has collided with the treasure
-        return false;
+        // Check if the sailor has collided with the treasure
+        return sailor.getHitbox().intersects(treasure.getHitbox());
     }
 
     /**
@@ -115,13 +127,13 @@ public class Level1 extends Level {
                         allPirates.add(new Blackbeard(x, y));
                         break;
                     case "Potion":
-                        items.add(new Potion(x, y));
+                        allItems.add(new Potion(x, y));
                         break;
                     case "Elixir":
-                        items.add(new Elixir(x, y));
+                        allItems.add(new Elixir(x, y));
                         break;
                     case "Sword":
-                        items.add(new Sword(x, y));
+                        allItems.add(new Sword(x, y));
                         break;
                     case "Treasure":
                         treasure = new Treasure(x, y);
@@ -137,7 +149,6 @@ public class Level1 extends Level {
                         System.exit(1);
                 }
             }
-
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);

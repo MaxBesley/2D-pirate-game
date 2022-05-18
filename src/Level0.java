@@ -2,12 +2,10 @@
 
 import bagel.Image;
 import bagel.Input;
-import bagel.Window;
 import bagel.util.Point;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 
 /**
  * The first level of the ShadowPirate game.
@@ -37,7 +35,6 @@ public class Level0 extends Level {
      * based on the game user's keyboard inputs.
      */
     public void update(Input input) {
-
         if (!levelOn) {
             drawStartScreen(input, LADDER_MESSAGE);
         }
@@ -47,6 +44,7 @@ public class Level0 extends Level {
             completeScreenTimer.update();
             if (completeScreenTimer.isOff()) {
                 readyToTransition = true;
+                wipeAllObjects();
             }
         }
 
@@ -76,16 +74,16 @@ public class Level0 extends Level {
 
             // Update the sailor
             sailor.update(input, this);
-        }
 
-        // Check if the player completed level0
-        if (isComplete()) {
-            levelWon = true;
-            completeScreenTimer.turnOn();
-        }
-        // Otherwise, check if the player died
-        else if (isLost()) {
-            levelLost = true;
+            // Check if the player completed level0
+            if (isComplete()) {
+                levelWon = true;
+                completeScreenTimer.turnOn();
+            }
+            // Otherwise, check if the player died
+            else if (isLost()) {
+                levelLost = true;
+            }
         }
     }
 
@@ -93,15 +91,26 @@ public class Level0 extends Level {
      * Determines if the player has completed/won the first level (i.e. level0).
      */
     public boolean isComplete() {
-        // Check whether the sailor has reached the ladder
+        // Check if the sailor has reached the ladder
         return sailor.getX() >= LADDER_X && sailor.getY() > LADDER_Y;
     }
 
     /**
-     *
+     * Returns whether level0 is ready to transition into level1.
      */
     public boolean isReadyToTransition() {
         return readyToTransition;
+    }
+
+    private void wipeAllObjects() {
+        // Let the garbage collector clean up this memory
+        allBlocks.clear();
+        allBlocks = null;
+        allPirates.clear();
+        allPirates = null;
+        allProjectiles.clear();
+        allProjectiles = null;
+        sailor = null;
     }
 
     /**
@@ -147,7 +156,6 @@ public class Level0 extends Level {
                         System.exit(1);
                 }
             }
-
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);

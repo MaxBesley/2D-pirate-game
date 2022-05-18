@@ -2,8 +2,9 @@
 
 import java.util.Random;
 
-/*
- *
+/**
+ * Represents a direction that can be either left, right up or down.
+ * Diagonal directions are not supported/possible.
  */
 public class Direction {
     private static final String LEFT = "left";
@@ -12,7 +13,11 @@ public class Direction {
     private static final String DOWN = "down";
     private String currentDir;
 
-    // Constructor
+
+    /**
+     * Creates a random direction, where each of the four
+     * possible directions have equal probability.
+     */
     public Direction() {
         // Generate a random direction (as a string)
         String[] allDirs = {LEFT, RIGHT, UP, DOWN};
@@ -22,37 +27,50 @@ public class Direction {
         setCurrentDir(randomDir);
     }
 
-    /*
-     * Method that gets the `currentDir` string
+    /**
+     * Returns the `currentDir` attribute (a string).
      */
     public String getCurrentDir() {
         return currentDir;
     }
 
+    // Setter for the `currentDir` attribute.
     private void setCurrentDir(String currentDir) {
         this.currentDir = currentDir;
     }
 
-    public boolean isMovingLeft() {
+    /**
+     * Returns whether the direction is left.
+     */
+    public boolean isLeft() {
         return currentDir.equals(LEFT);
     }
 
-    public boolean isMovingRight() {
+    /**
+     * Returns whether the direction is right.
+     */
+    public boolean isRight() {
         return currentDir.equals(RIGHT);
     }
 
-    public boolean isMovingUp() {
+    /**
+     * Returns whether the direction is up.
+     */
+    public boolean isUp() {
         return currentDir.equals(UP);
     }
 
-    public boolean isMovingDown() {
+    /**
+     * Returns whether the direction is down.
+     */
+    public boolean isDown() {
         return currentDir.equals(DOWN);
     }
 
-    /*
-     *
+    /**
+     * Reverses to the opposite direction.
      */
-    public void reverseDirection() {
+    public void reverse() {
         switch (currentDir) {
             case LEFT:
                 setCurrentDir(RIGHT);
@@ -66,6 +84,9 @@ public class Direction {
             case DOWN:
                 setCurrentDir(UP);
                 break;
+            default:
+                System.err.println("Error: direction must be one of left, right up or down.");
+                System.exit(1);
         }
     }
 }

@@ -1,8 +1,8 @@
 /* Max Besley. May 2022. */
 
+import bagel.Keys;
 import bagel.Image;
 import bagel.Input;
-import bagel.Keys;
 import bagel.util.Rectangle;
 
 /**
@@ -10,15 +10,15 @@ import bagel.util.Rectangle;
  */
 public class Sailor extends Person {
     // The sailor's internal instance variables
-    private final Image SAILOR_LEFT;
-    private final Image SAILOR_RIGHT;
-    private final Image SAILOR_HIT_LEFT;
-    private final Image SAILOR_HIT_RIGHT;
+    private final Image SAILOR_LEFT = new Image("res/sailor/sailorLeft.png");
+    private final Image SAILOR_RIGHT = new Image("res/sailor/sailorRight.png");
+    private final Image SAILOR_HIT_LEFT = new Image("res/sailor/sailorHitLeft.png");
+    private final Image SAILOR_HIT_RIGHT = new Image("res/sailor/sailorHitRight.png");
     private boolean isIdle;
     private boolean isAttacking;
-    private static final int SPEED = 5;
-    private static final double ATTACK_STATE_LEN = 1000.0;
-    private static final double ATTACK_COOLDOWN_LEN = 2000.0;
+    private static final int SPEED = 1;
+    private static final double ATTACK_STATE_DURATION = 1000.0;
+    private static final double ATTACK_COOLDOWN_DURATION = 2000.0;
     private static final int HEALTH_BAR_X = 10;
     private static final int HEALTH_BAR_Y = 25;
 
@@ -27,19 +27,15 @@ public class Sailor extends Person {
      * Creates a sailor at an initial (x, y) position.
      */
     public Sailor(int xCoord, int yCoord) {
-        SAILOR_LEFT = new Image("res/sailor/sailorLeft.png");
-        SAILOR_RIGHT = new Image("res/sailor/sailorRight.png");
-        SAILOR_HIT_LEFT = new Image("res/sailor/sailorHitLeft.png");
-        SAILOR_HIT_RIGHT = new Image("res/sailor/sailorHitRight.png");
         currentImage = SAILOR_RIGHT;
         damagePoints = 15;
         maxHealthPoints = 100;
         healthBar = new HealthBar(maxHealthPoints);
         healthBarSize = 30;
-        stateTimer = new Timer(ATTACK_STATE_LEN);
-        attackCooldownTimer = new Timer(ATTACK_COOLDOWN_LEN);
+        stateTimer = new Timer(ATTACK_STATE_DURATION);
+        attackCooldownTimer = new Timer(ATTACK_COOLDOWN_DURATION);
         // The position is at the centre of the image (not the top left)
-        position = new Position(xCoord + SAILOR_LEFT.getWidth()/2, yCoord + SAILOR_LEFT.getHeight()/2);
+        position = new Position(xCoord + SAILOR_LEFT.getWidth()/2.0, yCoord + SAILOR_LEFT.getHeight()/2.0);
         oldPosition = null;
         // Initialise the state of the Sailor object
         inCooldown = false;
@@ -54,9 +50,8 @@ public class Sailor extends Person {
      * @param level This is the level the sailor is contained in.
      */
     public void update(Input input, Level level) {
-        /* Note that the methods move(), checkOutOfBounds(),
-           checkBlockCollisions(), checkAttackKey() and
-           updateTimers() might do nothing at all. */
+        /* Note that the methods move(), checkCollisions(),
+           attack() and updateTimers() might do nothing at all. */
 
         move(input);
 
@@ -97,9 +92,6 @@ public class Sailor extends Person {
         }
     }
 
-    /*
-     * Method that sets `oldPosition` to be identical to `position`.
-     */
     private void setOldPosition() {
         // The old position should be a copy of the current position
         // So use the copy constructor in the `Position` class
@@ -133,14 +125,6 @@ public class Sailor extends Person {
         }
     }
 
-    /*
-     * Method that determines if a Sailor object has collided with the passed Pirate object.
-     */
-    private boolean hasCollided(Pirate pirate) {
-        Rectangle sailorHitbox = this.getHitbox();
-        return sailorHitbox.intersects(pirate.getHitbox());
-    }
-
     /* Determines if the sailor has collided with any of
        the blocks or a level edge, and if so, moves the
        sailor back to its previous position. */
@@ -157,16 +141,22 @@ public class Sailor extends Person {
     }
 
     private void checkBlockCollisions(Level level) {
-        // Check for a block collision
+        // Check for a block collision (including bombs)
         for (Block b : level.allBlocks) {
             if (hasCollided(b)) {
+                // Check if `b` is a Bomb object
+                if (b instanceof Bomb) {
+                    // Explode the bomb in the sailor's face... Ouch!
+                    ((Bomb) b).explode(this);
+                }
+                // Either way, move the sailor back to its previous position
                 moveBack();
                 break;
             }
         }
     }
 
-    /*
+    /**
      * Causes the sailor to lose health points.
      */
     @Override
@@ -183,10 +173,10 @@ public class Sailor extends Person {
         }
         // If the timer is on then the sailor
         // is still in the attack state
-        if (stateTimer.isOn()) {
+        if (!stateTimer.isOff()) {
             for (Pirate p : level.allPirates) {
                 // Check if the sailor has collided with (attacked) the pirate
-                if (this.hasCollided(p)) {
+                if (hasCollided(p)) {
                     p.getHit(damagePoints);
                 }
             }
@@ -204,5 +194,21 @@ public class Sailor extends Person {
             isAttacking = true;
             stateTimer.turnOn();
         }
+    }
+
+    /* Determines if the sailor has collided
+       with the passed Pirate object. */
+    private boolean hasCollided(Pirate pirate) {
+        Rectangle sailorHitbox = this.getHitbox();
+        return sailorHitbox.intersects(pirate.getHitbox());
+    }
+
+    /**
+     *  Determines if the sailor has collided
+     *  with the passed Item object.
+     */
+    public boolean hasCollided(Item item) {
+        Rectangle sailorHitbox = this.getHitbox();
+        return sailorHitbox.intersects(item.getHitbox());
     }
 }

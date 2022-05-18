@@ -20,6 +20,7 @@ public class Bomb extends Block {
     public Bomb(int x, int y) {
         super(x, y);
         currentImage = BOMB_IMAGE;
+        explosionTimer = new Timer(EXPLODE_DURATION);
         hasExploded = false;
     }
 
@@ -28,20 +29,28 @@ public class Bomb extends Block {
      */
     public void update(Sailor sailor) {
         draw();
-        if (!hasExploded && sailor.hasCollided(this)) {
-            // Explode the bomb in the sailor's face
-            explode(sailor);
-        } else if (hasExploded && explosionTimer.isOff()) {
+        // The line below will do nothing if the timer is off
+        explosionTimer.update();
+        // Check if the timer has finished ticking down
+        if (hasExploded && explosionTimer.isOff()) {
             // Get rid of the exploded bomb ASAP
             toBeDeleted = true;
         }
     }
 
-    private void explode(Sailor sailor) {
-        currentImage = EXPLOSION_IMAGE;
-        hasExploded = true;
-        sailor.getHit(DAMAGE_POINTS);
-        explosionTimer = new Timer(EXPLODE_DURATION);
-        explosionTimer.turnOn();
+    /**
+     * Causes the bomb to explode once and cause damage to the sailor.
+     * @param sailor This is the sailor who will be attacked.
+     */
+    public void explode(Sailor sailor) {
+        // The if statement here ensures only one explosion occurs
+        if (!hasExploded) {
+            // Deal damage to the sailor
+            sailor.getHit(DAMAGE_POINTS);
+            // Put the bomb into the 'exploding' state
+            currentImage = EXPLOSION_IMAGE;
+            hasExploded = true;
+            explosionTimer.turnOn();
+        }
     }
 }

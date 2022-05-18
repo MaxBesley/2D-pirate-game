@@ -13,26 +13,26 @@ public class Pirate extends Person {
     private final Image PIRATE_INVINC_LEFT = new Image("res/pirate/pirateHitLeft.png");
     private final Image PIRATE_INVINC_RIGHT = new Image("res/pirate/pirateHitRight.png");
     private final Image PIRATE_PROJECTILE_IMAGE = new Image("res/pirate/pirateProjectile.png");
-    private static final double PIRATE_PROJECTILE_SPEED = 0.4;
-    private static final int HEALTH_BAR_Y_OFFSET = 6;
-    Rectangle attackRange;
-    private int attackRangeSize = 100;
-    private double attackCooldownLen = 3000.0;
-    private double invincStateLen = 1500.0;
-    private static final double RAND_LOWER = 0.2;
-    private static final double RAND_UPPER = 0.7;
-    private final double SPEED;
-    private Direction direction;
-    private boolean toBeDeleted;
-    private boolean isInvincible;
+    public static final double PIRATE_PROJECTILE_SPEED = 0.4;
+    public static final int HEALTH_BAR_Y_OFFSET = 6;
+    public Rectangle attackRange;
+    public int attackRangeSize = 100;
+    public double attackCooldownDuration = 3000.0;
+    public double invincStateDuration = 1500.0;
+    public static final double RAND_LOWER = 0.2;
+    public static final double RAND_UPPER = 0.7;
+    public final double SPEED;
+    public Direction direction;
+    public boolean toBeDeleted;
+    public boolean isInvincible;
 
     /* These attributes below ensure that a pirate doesn't
        get stuck on a block.
        Once a collision has occurred, collision detection will
-       be halted for `COLLISION_PAUSE_LEN` milliseconds. */
+       be halted for `COLLISION_PAUSE_DURATION` milliseconds. */
     private boolean justCollidedWithBlock;
     private Timer collisionPauseTimer;
-    private static final int COLLISION_PAUSE_LEN = 100;
+    private static final int COLLISION_PAUSE_DURATION = 100;    // 10% of a second seems to work just fine
 
 
     /**
@@ -44,10 +44,10 @@ public class Pirate extends Person {
         maxHealthPoints = 45;
         healthBar = new HealthBar(maxHealthPoints);
         healthBarSize = 15;
-        stateTimer = new Timer(invincStateLen);
-        attackCooldownTimer = new Timer(attackCooldownLen);
-        collisionPauseTimer = new Timer(COLLISION_PAUSE_LEN);
-        position = new Position(xCoord + PIRATE_LEFT.getWidth()/2, yCoord + PIRATE_LEFT.getHeight()/2);
+        stateTimer = new Timer(invincStateDuration);
+        attackCooldownTimer = new Timer(attackCooldownDuration);
+        collisionPauseTimer = new Timer(COLLISION_PAUSE_DURATION);
+        position = new Position(xCoord + PIRATE_LEFT.getWidth()/2.0, yCoord + PIRATE_LEFT.getHeight()/2.0);
         oldPosition = null;
         // Assign a random speed value using the formula below
         Random r = new Random();
@@ -88,27 +88,20 @@ public class Pirate extends Person {
                        getY() - currentImage.getHeight()/2 - HEALTH_BAR_Y_OFFSET, healthBarSize);
     }
 
-    /*
-     * Returns whether the pirate needs to be deleted from the game.
-     */
-    public boolean isToBeDeleted() {
-        return toBeDeleted;
-    }
-
-    /*
+    /**
      * Moves the pirate forward based on its current direction.
      */
     public void move() {
         // Move the pirate (note: cannot move diagonally)
-        if (direction.isMovingLeft()) {
+        if (direction.isLeft()) {
             setX(getX() - SPEED);
             isFacingRight = false;
-        } else if (direction.isMovingRight()) {
+        } else if (direction.isRight()) {
             setX(getX() + SPEED);
             isFacingRight = true;
-        }  else if (direction.isMovingUp()) {
+        }  else if (direction.isUp()) {
             setY(getY() - SPEED);
-        } else if (direction.isMovingDown()) {
+        } else if (direction.isDown()) {
             setY(getY() + SPEED);
         }
     }
@@ -148,7 +141,7 @@ public class Pirate extends Person {
         // Check if the pirate collided with a block not so long ago
         if (justCollidedWithBlock) {
             // Check if the timer is over yet
-            if (!collisionPauseTimer.isOn()) {
+            if (collisionPauseTimer.isOff()) {
                 justCollidedWithBlock = false;
             } else {
                 // The timer is on so update its state
@@ -171,7 +164,7 @@ public class Pirate extends Person {
         }
     }
 
-    /*
+    /**
      * Causes a pirate to lose health and
      * then enter the invincible state.
      */
@@ -204,13 +197,19 @@ public class Pirate extends Person {
     private void checkStateChange() {
         // Check if the pirate's state should change.
         // Recall that there are three different states.
-        if (isInvincible && !stateTimer.isOn()) {
+        if (isInvincible && stateTimer.isOff()) {
             isInvincible = false;
         }
-        if (inCooldown && !attackCooldownTimer.isOn()) {
+        if (inCooldown && attackCooldownTimer.isOff()) {
             inCooldown = false;
         }
     }
 
-
+    /**
+     * Returns whether a pirate needs to be deleted from the game.
+     * Useful so that we don't waste computer resources.
+     */
+    public boolean isToBeDeleted() {
+        return toBeDeleted;
+    }
 }

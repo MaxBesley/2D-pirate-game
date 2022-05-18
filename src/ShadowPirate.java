@@ -2,6 +2,8 @@
 
 import bagel.*;
 import bagel.util.Point;
+import bagel.util.Rectangle;
+
 import java.util.ArrayList;
 import java.io.FileReader;
 import java.io.BufferedReader;
@@ -61,6 +63,7 @@ public class ShadowPirate extends AbstractGame {
     @Override
     public void update(Input input) {
 
+        // For exiting the game
         if (input.wasPressed(Keys.ESCAPE)) {
             Window.close();
         }
@@ -75,6 +78,11 @@ public class ShadowPirate extends AbstractGame {
 
         if (inLevel1) {
             level1.update(input);
+        }
+
+        // To skip ahead to level1 (shhhhh! this is a secret!)
+        if (input.wasPressed(Keys.W)) {
+            inLevel0 = false; inLevel1 = true;
         }
 
         totalFramesRendered++;

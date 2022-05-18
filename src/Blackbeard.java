@@ -21,4 +21,21 @@ public class Blackbeard extends Pirate {
 
     }
 
+    private void updateCurrentImage() {
+        // Determine what the current image should be
+        if (isInvincible) {
+            if (isFacingRight) {
+                currentImage = BB_INVINC_RIGHT;
+            } else {
+                currentImage = BB_INVINC_LEFT;
+            }
+        } else {
+            if (isFacingRight) {
+                currentImage = BB_RIGHT;
+            } else {
+                currentImage = BB_LEFT;
+            }
+        }
+    }
+
 }

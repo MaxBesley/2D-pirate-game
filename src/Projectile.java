@@ -11,18 +11,21 @@ import bagel.Image;
  */
 public class Projectile {
     private final Image PROJECTILE_IMAGE;
-    private Vector2 unitVector;
-    private DrawOptions options;
+    private final Vector2 unitVector;
+    private final DrawOptions options;
     private double x;                       // x coordinate of projectile
     private double y;                       // y coordinate of projectile
     private final int DAMAGE_POINTS;        // damage the projectile inflicts
     private final double SPEED;             // in pixels per frame
     private final double ROTATION_ANGLE;    // in units of radians
     private boolean toBeDeleted;
-    private static final double HIT_THRESHOLD = 20.0;    // How close the projectile needs to be to its target to hit
+    /* How close the projectile needs to be to hit its target.
+       Through testing, I found that this particular value works well.
+       But other choices could also be made. */
+    private static final double HIT_THRESHOLD = 20.0;
 
 
-    /*
+    /**
      * Creates a projectile.
      */
     public Projectile(Position source, Position target, int damagePoints, double speed, Image projectileImage) {
@@ -35,13 +38,22 @@ public class Projectile {
         x = source.getX();
         y = source.getY();
 
-        // Determine the correct rotation angle
+        // Determine the correct rotation angle (checking all edge cases)
         if (target.getX() - source.getX() != 0.0) {
             // I give all the credit here to Calculus 2
             ROTATION_ANGLE = atan((target.getY() - source.getY()) / (target.getX() - source.getX()));
-        } else {
-            // Be careful of divide-by-zero error
-            ROTATION_ANGLE = 0.0;
+        }
+        // Avoid divide-by-zero errors
+        else {
+            // Determine if we should rotate 90 or -90 degrees
+            if (target.getY() < source.getY()) {
+                ROTATION_ANGLE = Math.PI/2.0;
+            } else if (target.getY() > source.getY()) {
+                ROTATION_ANGLE = -1 * (Math.PI/2.0);
+            } else {
+                // In this case, the source and target are on top of each other
+                ROTATION_ANGLE = 0.0;
+            }
         }
 
         // Calculate the unit vector pointing from the source (pirate) to the target (sailor)
@@ -51,7 +63,7 @@ public class Projectile {
         options = new DrawOptions().setRotation(ROTATION_ANGLE);
     }
 
-    /*
+    /**
      * Updates the internal state of a moving projectile.
      */
     public void update(Level level) {
@@ -76,7 +88,7 @@ public class Projectile {
         if (isOutOfBounds(level.boundaryTopLeft, level.boundaryBottomRight)) {
             toBeDeleted = true;
         }
-        // Check collision with sailor
+        // Check collision with sailor (note: the projectile just needs to get close enough)
         else if (new Point(level.sailor.getX(), level.sailor.getY()).distanceTo(new Point(x, y)) <= HIT_THRESHOLD) {
             level.sailor.getHit(DAMAGE_POINTS);
             toBeDeleted = true;
@@ -88,8 +100,8 @@ public class Projectile {
                  topLeft.y < y && y < bottomRight.y);
     }
 
-    /*
-     * Returns whether the projectile needs to be deleted from the game.
+    /**
+     * Returns whether a projectile needs to be deleted from the game.
      */
     public boolean isToBeDeleted() {
         return toBeDeleted;

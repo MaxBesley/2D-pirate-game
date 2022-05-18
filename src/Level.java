@@ -9,7 +9,7 @@ import bagel.util.Point;
 import java.util.ArrayList;
 
 /**
- *
+ * Represents an abstract level of the ShadowPirate game.
  */
 public abstract class Level {
     public Image backgroundImage;

@@ -21,100 +21,110 @@ public abstract class Person {
     public boolean isFacingRight;
 
 
-    /*
+    /**
      * Method for drawing a child of the `Parent` class to the screen
      */
     public void draw() {
         currentImage.draw(getX(), getY());
     }
 
-    // For getting the x and y coordinates of the Person object
+    /**
+     * Gets the x coordinate of a Person object.
+     */
     public double getX() {
         return position.getX();
     }
+
+    /**
+     * Gets the y coordinate of a Person object.
+     */
     public double getY() {
         return position.getY();
     }
 
-    // For setting the x and y coordinates of the Person object
+    /**
+     * Sets the x coordinate of a Person object to a new value.
+     */
     public void setX(double x) {
         position.setX(x);
     }
+
+    /**
+     * Sets the y coordinate of a Person object to a new value.
+     */
     public void setY(double y) {
         position.setY(y);
     }
 
-    /*
+    /**
      * Returns the current position of the Person object.
      */
     public Position getPosition() {
         return position;
     }
 
-    // Method for getting the health points the sailor has (but not as a percentage!)
-    public int getHealthPoints() {
-        return healthBar.getCurrHealthPoints();
-    }
-
-    /*
+    /**
      * Determines whether a Person object is dead or alive.
      */
     public boolean isAlive() {
         return healthBar.getCurrHealthPoints() > 0;
     }
 
-    /*
+    /**
      * Determines whether a Person object can perform an attack.
      */
     public boolean canAttack() {
         return !inCooldown;
     }
 
-    /*
-     * Method that determines if a Person object has collided with the passed Block object.
+    /**
+     * Determines if a Person object has collided with the passed Block object.
      */
     public boolean hasCollided(Block block) {
         Rectangle hitbox = this.getHitbox();
         return hitbox.intersects(block.getHitbox());
     }
 
-    /*
+    /**
      * Returns the hitbox of a Person object.
      */
     public Rectangle getHitbox() {
         return currentImage.getBoundingBoxAt(new Point(getX(), getY()));
     }
 
-    // Method for decreasing the current health of the sailor
+    /**
+     * Decreases the current health points of a Person object.
+     */
     public void reduceHealth(int amount) {
-        int currentHealth = this.getHealthPoints();
+        int currentHealth = healthBar.getCurrHealthPoints();
         healthBar.setCurrHealthPoints(currentHealth - amount);
     }
 
-    /*
+    /**
      * Determines whether a Person object's position is out of bounds.
+     * Where "position" is defined as the top left corner of the image.
      */
     public boolean isOutOfBounds(Point topLeft, Point bottomRight) {
-        double personX = getX();
-        double personY = getY();
-        return !(topLeft.x < personX && personX < bottomRight.x  &&
-                 topLeft.y < personY && personY < bottomRight.y);
+        double topLeftX = getX() - currentImage.getWidth()/2.0;
+        double topLeftY = getY() - currentImage.getHeight()/2.0;
+        return !(topLeft.x < topLeftX && topLeftX < bottomRight.x &&
+                 topLeft.y < topLeftY && topLeftY < bottomRight.y);
     }
 
-    /*
+    /**
      * Updates the states of the person's Timer
      * objects (assuming they're activated).
      */
     public void updateTimers() {
-        if (stateTimer.isOn()) {
+        if (!stateTimer.isOff()) {
             stateTimer.update();
         }
-        if (attackCooldownTimer.isOn()) {
+        if (!attackCooldownTimer.isOff()) {
             attackCooldownTimer.update();
         }
     }
 
-    /*
+    /**
      * Inflicts `damagePoints` damage on the Person object.
      */
     public abstract void getHit(int damagePoints);
