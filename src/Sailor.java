@@ -5,6 +5,8 @@ import bagel.Image;
 import bagel.Input;
 import bagel.util.Rectangle;
 
+import java.util.ArrayList;
+
 /**
  * Represents the sailor in the ShadowPirate game (i.e. the player).
  */
@@ -14,9 +16,10 @@ public class Sailor extends Person {
     private final Image SAILOR_RIGHT = new Image("res/sailor/sailorRight.png");
     private final Image SAILOR_HIT_LEFT = new Image("res/sailor/sailorHitLeft.png");
     private final Image SAILOR_HIT_RIGHT = new Image("res/sailor/sailorHitRight.png");
+    private ArrayList<Item> inventory = new ArrayList<Item>();
     private boolean isIdle;
     private boolean isAttacking;
-    private static final int SPEED = 1;
+    private static final int SPEED = 7;
     private static final double ATTACK_STATE_DURATION = 1000.0;
     private static final double ATTACK_COOLDOWN_DURATION = 2000.0;
     private static final int HEALTH_BAR_X = 10;
@@ -210,5 +213,20 @@ public class Sailor extends Person {
     public boolean hasCollided(Item item) {
         Rectangle sailorHitbox = this.getHitbox();
         return sailorHitbox.intersects(item.getHitbox());
+    }
+
+    /**
+     * Method that adds the passed Item object
+     * into the sailor's inventory.
+     */
+    public void addToInventory(Item item) {
+        inventory.add(item);
+    }
+
+    /**
+     *
+     */
+    public int getIndexOfItem(Item item) {
+        return inventory.indexOf(item);
     }
 }

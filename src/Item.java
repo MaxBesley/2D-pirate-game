@@ -10,10 +10,10 @@ import bagel.util.Rectangle;
 public abstract class Item {
     public Image ITEM_IMAGE;
     public Image ITEM_ICON_IMAGE;
+    public static final int ITEM_ICON_SPACING = 40;
     public final int x;
     public final int y;
     public boolean pickedUp;
-    public boolean toBeDeleted;
 
 
     /**
@@ -23,7 +23,6 @@ public abstract class Item {
         this.x = x;
         this.y = y;
         pickedUp = false;
-        toBeDeleted = false;
     }
 
     /**
@@ -36,12 +35,12 @@ public abstract class Item {
             // Check if the sailor is touching the item
             if (sailor.hasCollided(this)) {
                 pickedUp = true;
-                toBeDeleted = true;
                 applyEffect(sailor);
+                sailor.addToInventory(this);
             }
         } else {
-            // Draw the item icon
-
+            // Draw the item's icon below the sailor's health bar
+            drawIcon(10, 40 + ITEM_ICON_SPACING * sailor.getIndexOfItem(this));
         }
     }
 
@@ -57,7 +56,7 @@ public abstract class Item {
      * at the specified x, y coordinate.
      */
     public void drawIcon(int x, int y) {
-        ITEM_ICON_IMAGE.draw(x, y);
+        ITEM_ICON_IMAGE.drawFromTopLeft(x, y);
     }
 
     /**
@@ -66,13 +65,6 @@ public abstract class Item {
     public Rectangle getHitbox() {
         return ITEM_IMAGE.getBoundingBoxAt(new Point(x + ITEM_IMAGE.getWidth()/2.0,
                                                      y + ITEM_IMAGE.getHeight()/2.0));
-    }
-
-    /**
-     * Returns whether an Item object needs to be deleted from the game.
-     */
-    public boolean isToBeDeleted() {
-        return toBeDeleted;
     }
 
     /**
