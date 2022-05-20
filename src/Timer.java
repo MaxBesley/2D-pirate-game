@@ -1,4 +1,4 @@
-/* Max Besley. May 2022. */
+/* Max Besley. 20 May 2022. */
 
 /**
  * Represents a timer that counts down to zero.
@@ -28,7 +28,7 @@ public class Timer {
         // If the timer is off then exit immediately
         if (!isOff()) {
             // Reduce the amount of time
-            currTime -= MILLISECS_IN_SEC / ShadowPirate.getRefreshRate();   // need to check this later
+            currTime -= MILLISECS_IN_SEC / ShadowPirate.getRefreshRate();
             // Check if the timer has finished ticking down
             if (isOver()) {
                 reset();

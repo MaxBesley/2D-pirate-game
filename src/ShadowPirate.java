@@ -1,13 +1,6 @@
-/* Max Besley. May 2022. */
+/* Max Besley. 20 May 2022. */
 
 import bagel.*;
-import bagel.util.Point;
-import bagel.util.Rectangle;
-
-import java.util.ArrayList;
-import java.io.FileReader;
-import java.io.BufferedReader;
-import java.io.IOException;
 
 /**
  * SWEN20003 Project 2, Semester 1, 2022.
@@ -27,6 +20,7 @@ public class ShadowPirate extends AbstractGame {
     // Counts the total number of calls to `update()`
     private static int totalFramesRendered = 0;
 
+    // The game levels (only two)
     private Level0 level0;
     private Level1 level1;
     private boolean inLevel0;

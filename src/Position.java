@@ -1,4 +1,4 @@
-/* Max Besley. May 2022. */
+/* Max Besley. 20 May 2022. */
 
 /**
  * A mutable class that represents an (x, y) coordinate.

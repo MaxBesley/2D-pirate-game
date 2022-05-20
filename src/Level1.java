@@ -1,4 +1,4 @@
-/* Max Besley. May 2022. */
+/* Max Besley. 20 May 2022. */
 
 import bagel.Input;
 import bagel.Image;
@@ -67,13 +67,13 @@ public class Level1 extends Level {
             for (Item i : allItems) {
                 i.update(sailor);
             }
-            allItems.removeIf(Item::isToBeDeleted);
 
             // Draw the treasure
             treasure.draw();
 
             sailor.update(input, this);
 
+            // Check win and lose conditions
             if (isComplete()) {
                 levelWon = true;
             }
@@ -92,7 +92,7 @@ public class Level1 extends Level {
     }
 
     /**
-     * Method used to process world files and create objects.
+     * Method used to process a world file and create objects for level 1.
      */
     public void readCSV(String fileName) {
         int x, y;

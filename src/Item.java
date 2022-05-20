@@ -1,4 +1,4 @@
-/* Max Besley. May 2022. */
+/* Max Besley. 20 May 2022. */
 
 import bagel.Image;
 import bagel.util.Point;
@@ -8,12 +8,20 @@ import bagel.util.Rectangle;
  * Represents an abstract stationary pickup item in the game.
  */
 public abstract class Item {
+    /** Image to be used to draw the specific item. */
     public Image ITEM_IMAGE;
+    /** Item's icon for the sailor's inventory. */
     public Image ITEM_ICON_IMAGE;
+    /** Used for spacing out the item icon images. */
     public static final int ITEM_ICON_SPACING = 40;
+    /** x coordinate of top left corner of item's image. */
     public final int x;
+    /** y coordinate of top left corner of item's image. */
     public final int y;
+    /** Stores whether or not the item has been picked up. */
     public boolean pickedUp;
+    private static final int ICON_X = 10;
+    private static final int ICON_Y = 40;
 
 
     /**
@@ -47,7 +55,7 @@ public abstract class Item {
             }
         } else {
             // Draw the item's icon below the sailor's health bar
-            drawIcon(10, 40 + ITEM_ICON_SPACING * sailor.getIndexOfItem(this));
+            drawIcon(ICON_X, ICON_Y + ITEM_ICON_SPACING * sailor.getIndexOfItem(this));
         }
     }
 

@@ -1,7 +1,7 @@
-/* Max Besley. May 2022. */
+/* Max Besley. 20 May 2022. */
 
-import bagel.DrawOptions;
 import bagel.Font;
+import bagel.DrawOptions;
 import bagel.util.Colour;
 
 /**

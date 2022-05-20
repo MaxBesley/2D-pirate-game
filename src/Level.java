@@ -1,4 +1,4 @@
-/* Max Besley. May 2022. */
+/* Max Besley. 20 May 2022. */
 
 import bagel.Keys;
 import bagel.Font;
@@ -12,22 +12,35 @@ import java.util.ArrayList;
  * Represents an abstract level of the ShadowPirate game.
  */
 public abstract class Level {
+    /** Game's background image. */
     public Image backgroundImage;
+    /** Top left corner of level boundary. */
     public Point boundaryTopLeft;
+    /** Bottom right corner of level boundary. */
     public Point boundaryBottomRight;
-    public final int MESSAGE_SIZE = 55;
-    public final int INSTRUCTION_OFFSET = 70;
-    final int FONT_Y_POS = 402;
-    final Font FONT = new Font("res/wheaton.otf", MESSAGE_SIZE);
+    private final int MESSAGE_SIZE = 55;
+    private final int INSTRUCTION_OFFSET = 70;
+    private final int FONT_Y_POS = 402;
+    private final Font FONT = new Font("res/wheaton.otf", MESSAGE_SIZE);
+    /** Top message of the start screen. */
     public static final String START_MESSAGE = "PRESS SPACE TO START";
+    /** Middle message of the start screen. */
     public static final String ATTACK_MESSAGE = "PRESS S TO ATTACK";
+    /** Message for when the player dies. */
     public static final String LOSE_MESSAGE = "GAME OVER";
+    /** Records whether or not the game has started. */
     public boolean levelOn;
+    /** Records whether or not the player has won. */
     public boolean levelWon;
+    /** Records whether or not the player has lost/died. */
     public boolean levelLost;
+    /** The sailor controlled by the player. */
     public Sailor sailor;
+    /** All the blocks/bombs contained in the level. */
     public ArrayList<Block> allBlocks;
+    /** All the enemies of the game (regular pirates and Blackbeard). */
     public ArrayList<Pirate> allPirates;
+    /** All the projectiles currently in the air. */
     public ArrayList<Projectile> allProjectiles;
 
 

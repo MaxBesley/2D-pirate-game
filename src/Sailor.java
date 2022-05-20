@@ -1,4 +1,4 @@
-/* Max Besley. May 2022. */
+/* Max Besley. 20 May 2022. */
 
 import bagel.Keys;
 import bagel.Image;
@@ -19,7 +19,7 @@ public class Sailor extends Person {
     private ArrayList<Item> inventory = new ArrayList<Item>();
     private boolean isIdle;
     private boolean isAttacking;
-    private static final int SPEED = 7;
+    private static final int SPEED = 1;
     private static final double ATTACK_STATE_DURATION = 1000.0;
     private static final double ATTACK_COOLDOWN_DURATION = 2000.0;
     private static final int HEALTH_BAR_X = 10;
@@ -224,7 +224,8 @@ public class Sailor extends Person {
     }
 
     /**
-     *
+     * Gets the index of the passed Item object in the sailor's inventory.
+     * In reality, the return value will always be between 0 and 2 inclusive.
      */
     public int getIndexOfItem(Item item) {
         return inventory.indexOf(item);

@@ -1,4 +1,4 @@
-/* Max Besley. May 2022. */
+/* Max Besley. 20 May 2022. */
 
 import static java.lang.Math.atan;
 import bagel.util.Point;

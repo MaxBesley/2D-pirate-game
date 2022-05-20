@@ -1,4 +1,4 @@
-/* Max Besley. May 2022. */
+/* Max Besley. 20 May 2022. */
 
 import bagel.Image;
 import bagel.util.Rectangle;
@@ -13,18 +13,31 @@ public class Pirate extends Person {
     private final Image PIRATE_INVINC_LEFT = new Image("res/pirate/pirateHitLeft.png");
     private final Image PIRATE_INVINC_RIGHT = new Image("res/pirate/pirateHitRight.png");
     private final Image PIRATE_PROJECTILE_IMAGE = new Image("res/pirate/pirateProjectile.png");
+    /** The projectile image for the pirate. */
     public Image projectileImage;
+    /** Attack range of pirate as a square. */
     public Rectangle attackRange;
+    /** Width of the attack range square. */
     public int attackRangeSize = 100;
+    /** Speed of pirates' projectile in pixels per second. */
     public double projectileSpeed = 0.4;
+    /** Length of cooldown state in milliseconds. */
     public double attackCooldownDuration = 3000.0;
+    /** Length of in invincible state in milliseconds. */
     public double invincStateDuration = 1500.0;
+    /** For drawing health bar above pirate. */
     public static final int HEALTH_BAR_Y_OFFSET = 6;
+    /** Minimum possible movement speed of pirate. */
     public static final double RAND_LOWER = 0.2;
+    /** Maximum possible movement speed of pirate. */
     public static final double RAND_UPPER = 0.7;
+    /** Speed of pirate. */
     public final double SPEED;
+    /** Direction of pirate. */
     public Direction direction;
+    /** Stores whether or not the pirate should be deleted from the game. */
     public boolean toBeDeleted;
+    /** Stores whether or not the pirate is in the invincible state. */
     public boolean isInvincible;
 
     /* These attributes below ensure that a pirate doesn't

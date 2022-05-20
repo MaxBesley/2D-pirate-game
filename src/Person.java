@@ -1,4 +1,4 @@
-/* Max Besley. May 2022. */
+/* Max Besley. 20 May 2022. */
 
 import bagel.Image;
 import bagel.util.Point;
@@ -8,16 +8,27 @@ import bagel.util.Rectangle;
  * Represents an in-game person (or living thing).
  */
 public abstract class Person {
+    /** The current image that should be drawn to represent the person in game. */
     public Image currentImage;
+    /** Amount of damage the person does upon attacking. */
     public int damagePoints;
+    /** Maximum health points the person can have and starts with. */
     public int maxHealthPoints;
+    /** The person's health bar. */
     public HealthBar healthBar;
+    /** Size of the person's health bar in the game. */
     public int healthBarSize;
+    /** For counting down a particular state the person can be in. */
     public Timer stateTimer;
+    /** For counting down attack cooldown state. */
     public Timer attackCooldownTimer;
+    /** Stores the current position of the person. */
     public Position position;
+    /** Stores the previous position of the person. */
     public Position oldPosition;
+    /** Stores whether or not the person is in the attack cooldown state. */
     public boolean inCooldown;
+    /** Stores whether or not the person is currently facing right. */
     public boolean isFacingRight;
 
 
