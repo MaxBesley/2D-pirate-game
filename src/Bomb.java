@@ -51,6 +51,10 @@ public class Bomb extends Block {
             currentImage = EXPLOSION_IMAGE;
             hasExploded = true;
             explosionTimer.turnOn();
+            // Print out a log entry
+            System.out.println("Bomb inflicts " + DAMAGE_POINTS + " damage points on Sailor. Sailor’s current health: "
+                              + sailor.healthBar.getCurrHealthPoints() + "/" + sailor.healthBar.getMaxHealthPoints());
+
         }
     }
 }

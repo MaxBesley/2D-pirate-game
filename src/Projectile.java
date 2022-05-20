@@ -13,6 +13,7 @@ public class Projectile {
     private final Image PROJECTILE_IMAGE;
     private final Vector2 unitVector;
     private final DrawOptions options;
+    private final Pirate firedBy;           // The Pirate object who fired the projectile
     private double x;                       // x coordinate of projectile
     private double y;                       // y coordinate of projectile
     private final int DAMAGE_POINTS;        // damage the projectile inflicts
@@ -28,10 +29,11 @@ public class Projectile {
     /**
      * Creates a projectile.
      */
-    public Projectile(Position source, Position target, int damagePoints, double speed, Image projectileImage) {
-        PROJECTILE_IMAGE = projectileImage;
-        DAMAGE_POINTS = damagePoints;
+    public Projectile(Pirate pirate, Position source, Position target, int damagePoints, double speed, Image projectileImage) {
+        firedBy = pirate;
         SPEED = speed;
+        DAMAGE_POINTS = damagePoints;
+        PROJECTILE_IMAGE = projectileImage;
         toBeDeleted = false;
 
         // Initially, the projectile is drawn at the pirate's position
@@ -90,8 +92,13 @@ public class Projectile {
         }
         // Check collision with sailor (note: the projectile just needs to get close enough)
         else if (new Point(level.sailor.getX(), level.sailor.getY()).distanceTo(new Point(x, y)) <= HIT_THRESHOLD) {
-            level.sailor.getHit(DAMAGE_POINTS);
             toBeDeleted = true;
+            // Hit the sailor
+            level.sailor.getHit(DAMAGE_POINTS);
+            // Print out a log entry
+            System.out.println(firedBy.getClass().getSimpleName() + " inflicts " + DAMAGE_POINTS + " damage points on Sailor."
+                               + " Sailor's current health: " + Math.max(0, level.sailor.healthBar.getCurrHealthPoints())
+                               + "/" + level.sailor.healthBar.getMaxHealthPoints());
         }
     }
 

@@ -13,12 +13,13 @@ public class Pirate extends Person {
     private final Image PIRATE_INVINC_LEFT = new Image("res/pirate/pirateHitLeft.png");
     private final Image PIRATE_INVINC_RIGHT = new Image("res/pirate/pirateHitRight.png");
     private final Image PIRATE_PROJECTILE_IMAGE = new Image("res/pirate/pirateProjectile.png");
-    public static final double PIRATE_PROJECTILE_SPEED = 0.4;
-    public static final int HEALTH_BAR_Y_OFFSET = 6;
+    public Image projectileImage;
     public Rectangle attackRange;
     public int attackRangeSize = 100;
+    public double projectileSpeed = 0.4;
     public double attackCooldownDuration = 3000.0;
     public double invincStateDuration = 1500.0;
+    public static final int HEALTH_BAR_Y_OFFSET = 6;
     public static final double RAND_LOWER = 0.2;
     public static final double RAND_UPPER = 0.7;
     public final double SPEED;
@@ -40,6 +41,7 @@ public class Pirate extends Person {
      */
     public Pirate(int xCoord, int yCoord) {
         currentImage = PIRATE_RIGHT;
+        projectileImage = PIRATE_PROJECTILE_IMAGE;
         damagePoints = 10;
         maxHealthPoints = 45;
         healthBar = new HealthBar(maxHealthPoints);
@@ -106,7 +108,7 @@ public class Pirate extends Person {
         }
     }
 
-    private void updateCurrentImage() {
+    protected void updateCurrentImage() {
         // Determine what the current image should be
         if (isInvincible) {
             if (isFacingRight) {
@@ -173,7 +175,12 @@ public class Pirate extends Person {
         if (!isInvincible) {
             reduceHealth(damagePoints);
             isInvincible = true;
+            // Start the invincibility state timer
             stateTimer.turnOn();
+            // Add to the log
+            System.out.println("Sailor inflicts " + damagePoints + " damage points on " + getClass().getSimpleName() +
+                               ". " + getClass().getSimpleName() + "'s current health: " +
+                               Math.max(0, healthBar.getCurrHealthPoints()) + "/" + healthBar.getMaxHealthPoints());
         }
     }
 
@@ -185,8 +192,8 @@ public class Pirate extends Person {
                                         attackRangeSize, attackRangeSize);
             if (attackRange.intersects(level.sailor.getHitbox())) {
                 // BANG!!! Shoot at the sailor
-                level.allProjectiles.add(new Projectile(position, level.sailor.getPosition(), damagePoints,
-                                                        PIRATE_PROJECTILE_SPEED, PIRATE_PROJECTILE_IMAGE));
+                level.allProjectiles.add(new Projectile(this, position, level.sailor.getPosition(), damagePoints,
+                                                        projectileSpeed, projectileImage));
                 // Now enter the cooldown state
                 inCooldown = true;
                 attackCooldownTimer.turnOn();

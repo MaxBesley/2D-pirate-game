@@ -37,6 +37,13 @@ public abstract class Item {
                 pickedUp = true;
                 applyEffect(sailor);
                 sailor.addToInventory(this);
+                // Add an entry to the log on the command line
+                if (this instanceof Sword) {
+                    System.out.println("Sailor finds Sword. Sailor’s damage points increased to " + sailor.damagePoints);
+                } else {
+                    System.out.println("Sailor finds " + getClass().getSimpleName() + ". Sailor’s current health: " +
+                                        sailor.healthBar.getCurrHealthPoints() + "/" + sailor.healthBar.getMaxHealthPoints());
+                }
             }
         } else {
             // Draw the item's icon below the sailor's health bar

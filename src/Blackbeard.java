@@ -11,6 +11,8 @@ public class Blackbeard extends Pirate {
     private final Image BB_INVINC_LEFT = new Image("res/blackbeard/blackbeardHitLeft.png");
     private final Image BB_INVINC_RIGHT = new Image("res/blackbeard/blackbeardHitRight.png");
     private final Image BB_PROJECTILE_IMAGE = new Image("res/blackbeard/blackbeardProjectile.png");
+    private static final int BB_SCALE_FACTOR = 2;
+
 
     /**
      * Creates a Blackbeard object that is loaded
@@ -18,10 +20,19 @@ public class Blackbeard extends Pirate {
      */
     public Blackbeard(int x, int y) {
         super(x, y);
-
+        // Boost the stats of Blackbeard
+        projectileImage = BB_PROJECTILE_IMAGE;
+        damagePoints *= BB_SCALE_FACTOR;
+        maxHealthPoints *= BB_SCALE_FACTOR;
+        healthBar = new HealthBar(maxHealthPoints);
+        attackRangeSize *= BB_SCALE_FACTOR;
+        projectileSpeed += BB_SCALE_FACTOR;
+        attackCooldownDuration /= BB_SCALE_FACTOR;
+        attackCooldownTimer = new Timer(attackCooldownDuration);
     }
 
-    private void updateCurrentImage() {
+    @Override
+    protected void updateCurrentImage() {
         // Determine what the current image should be
         if (isInvincible) {
             if (isFacingRight) {
@@ -37,5 +48,4 @@ public class Blackbeard extends Pirate {
             }
         }
     }
-
 }
